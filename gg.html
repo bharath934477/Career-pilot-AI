@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Search Dashboard</title>
+</head>
+<body>
+  <h2>Search Anything</h2>
+  <form id="searchForm">
+    <input type="text" id="searchInput" placeholder="Ask anything..." required />
+    <button type="submit">Submit</button>
+  </form>
+
+  <h3>AI Suggestion:</h3>
+  <pre id="resultBox">Waiting for input...</pre>
+
+  <script>
+    const username = localStorage.getItem("username");
+
+    if (!username) {
+      alert("Not logged in.");
+      window.location.href = "/login.html";
+    }
+
+    document.getElementById("searchForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const searchQuery = document.getElementById("searchInput").value;
+
+      const res = await fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, searchQuery })
+      });
+
+      const data = await res.json();
+
+      document.getElementById("resultBox").textContent = data.result || data.error;
+    });
+  </script>
+</body>
+</html>

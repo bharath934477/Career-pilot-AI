@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="guard.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Profile — CareerPilot AI</title>
+<style>
+body{margin:0;font-family:'Inter','Segoe UI',system-ui,sans-serif;color:#e7e9f6;background:#070914;min-height:100vh}
+.wrap{max-width:980px;margin:0 auto;padding:34px 16px 120px}
+.hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.012));border:1px solid rgba(160,170,235,.16);border-top:1px solid rgba(242,196,109,.4);border-radius:18px;padding:22px;box-shadow:0 12px 34px rgba(3,5,20,.55)}
+.av{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:1.7rem;font-weight:700;color:#0b1024;background:linear-gradient(135deg,#8b9bff,#b79cff);box-shadow:0 0 0 4px rgba(139,155,255,.18)}
+#av{width:84px;height:84px;font-size:1.8rem}.av-wrap{position:relative;flex-shrink:0}
+.av-cam{position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;min-height:0!important;padding:0!important;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#0b1024;background:linear-gradient(135deg,#8b9bff,#b79cff);border:2px solid #070914!important;transition:transform .2s}.av-cam:hover{transform:scale(1.12)}
+.hero h1{margin:0;font-size:1.5rem}.hero p{margin:4px 0 0;color:#8b94b1;word-break:break-all}
+.tag{display:inline-block;margin-top:8px;padding:3px 11px;border-radius:999px;font-size:.74rem;background:rgba(242,196,109,.12);border:1px solid rgba(242,196,109,.35);color:#f2c46d}
+h2{font-size:1rem;color:#f2c46d;margin:26px 0 10px}
+.box{background:#0d1120;border:1px solid rgba(160,170,235,.16);border-radius:16px;overflow:auto}
+table{width:100%;border-collapse:collapse}th,td{padding:11px 14px;text-align:left;font-size:.88rem;border-bottom:1px solid rgba(160,170,235,.14);vertical-align:top}
+th{width:170px;color:#8b94b1;font-weight:500;background:rgba(255,255,255,.025)}tr:last-child th,tr:last-child td{border-bottom:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:16px}
+label{display:block;font-size:.78rem;color:#8b94b1;margin-bottom:5px}
+input{width:100%;min-height:44px;padding:9px 13px;border-radius:11px;border:1px solid rgba(160,170,235,.2);background:#070914;color:#e7e9f6;font:inherit;font-size:16px}
+input:focus{outline:none;border-color:#8b9bff;box-shadow:0 0 0 3px rgba(139,155,255,.22)}
+.f2{grid-column:1/-1}.act{padding:0 16px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button.p{min-height:44px;padding:9px 20px;border:0;border-radius:12px;background:linear-gradient(135deg,#8b9bff,#b79cff);color:#0b1024;font:inherit;font-weight:600;cursor:pointer}
+#msg{color:#7ee0a8;font-size:.86rem}.mu{color:#8b94b1}
+@media(max-width:560px){th{width:120px}}
+</style></head><body>
+<div class="wrap">
+<div class="hero"><div class="av-wrap"><div class="av" id="av" data-cp-avatar>?</div><button type="button" class="av-cam" title="Add / change profile photo" aria-label="Add or change profile photo" onclick="cpPickPhoto()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></button></div><div><h1 id="nm">My Profile</h1><p id="em"></p><span class="tag" id="rl"></span></div></div>
+<h2>📋 Profile details</h2>
+<div class="box"><table id="tb"></table></div>
+<h2>✏️ Edit profile</h2>
+<form class="box" id="fm"><div class="grid">
+<div class="f2"><label>Full name</label><input id="n" required></div>
+<div><label>Course / Degree</label><input id="c"></div><div><label>Year / Batch</label><input id="y"></div>
+<div class="f2"><label>Skills (comma separated)</label><input id="s" placeholder="Python, SQL, Design"></div>
+<div class="f2"><label>Interests (comma separated)</label><input id="i" placeholder="AI, Web, Robotics"></div></div>
+<div class="act"><button class="p" type="submit">Save profile</button><span id="msg"></span></div></form>
+<h2>🗂 My saved activity</h2>
+<div class="box"><table id="ac"><thead><tr><th style="width:auto">Feature</th><th style="width:auto">Times used</th><th style="width:auto">Last used</th></tr></thead><tbody></tbody></table></div>
+</div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={};try{S=JSON.parse(localStorage.getItem('cp_session')||'{}')}catch{}
+if(!S.email){location.replace('front.html')}
+const base=location.protocol==='file:'?'http://localhost:5000':'';
+const key=()=>(S.role||'student')+':'+String(S.email).toLowerCase();
+const A=()=>{try{return JSON.parse(localStorage.getItem('cp_accounts')||'{}')}catch{return{}}};
+const FEAT={myPlan:'My Plan',careerMatch:'Career Match',roadmap:'Roadmap',resume:'Resume Analysis',interview:'Interview Practice',coverLetter:'Cover Letter'};
+const fmt=d=>d?new Date(d).toLocaleString([], {dateStyle:'medium',timeStyle:'short'}):'—';
+let U={};
+async function load(){
+ const loc=A()[key()]||{};U={...loc,name:loc.name||S.name,email:S.email,role:S.role};
+ try{const r=await fetch(base+'/api/user/'+encodeURIComponent(S.email));if(r.ok){const j=await r.json();const u=j.user||j;if(u&&u.email)U={...U,...u}}}catch{}
+ if(!U.skills||!U.skills.length){try{const k=localStorage.getItem('skills');if(k)U.skills=k.split(',').map(x=>x.trim()).filter(Boolean)}catch{}}
+ if(!U.interests||!U.interests.length){try{const k=localStorage.getItem('interests');if(k)U.interests=k.split(',').map(x=>x.trim()).filter(Boolean)}catch{}}
+ draw()}
+function draw(){
+ const nm=U.name||'User';$('#av').textContent=nm.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();window.cpRenderAvatars&&cpRenderAvatars();
+ $('#nm').textContent=nm;$('#em').textContent=U.email;$('#rl').textContent=U.role==='graduate'?'🚀 Graduate':'🎓 Student';
+ const rows=[['Name',nm],['Email',U.email],['Account type',U.role==='graduate'?'Graduate':'Student'],['Course',U.course],['Year',U.year],['Skills',(U.skills||[]).join(', ')],['Interests',(U.interests||[]).join(', ')],['Joined',fmt(U.createdAt)],['Last login',fmt(U.lastLoginAt)],['Total logins',U.loginCount||0]];
+ $('#tb').innerHTML=rows.map(([k,v])=>`<tr><th>${k}</th><td>${v===''||v==null?'<span class="mu">—</span>':esc(v)}</td></tr>`).join('');
+ $('#n').value=nm;$('#c').value=U.course||'';$('#y').value=U.year||'';$('#s').value=(U.skills||[]).join(', ');$('#i').value=(U.interests||[]).join(', ');
+ const act=U.activity||{};
+ $('#ac tbody').innerHTML=Object.keys(FEAT).map(t=>{const l=act[t]||[];return `<tr><td>${FEAT[t]}</td><td>${l.length}</td><td>${l.length?fmt(l[l.length-1].at):'<span class="mu">—</span>'}</td></tr>`}).join('')}
+$('#fm').onsubmit=async e=>{e.preventDefault();
+ const p={email:S.email,name:$('#n').value.trim(),course:$('#c').value.trim(),year:$('#y').value.trim(),skills:$('#s').value,interests:$('#i').value};
+ const arr=v=>String(v).split(',').map(x=>x.trim()).filter(Boolean);
+ try{const a=A();if(a[key()]){Object.assign(a[key()],{name:p.name,course:p.course,year:p.year,skills:arr(p.skills),interests:arr(p.interests)});localStorage.setItem('cp_accounts',JSON.stringify(a))}}catch{}
+ try{localStorage.setItem('skills',p.skills);localStorage.setItem('interests',p.interests);S.name=p.name;localStorage.setItem('cp_session',JSON.stringify(S))}catch{}
+ try{await fetch(base+'/api/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)})}catch{}
+ U={...U,name:p.name,course:p.course,year:p.year,skills:arr(p.skills),interests:arr(p.interests)};draw();$('#msg').textContent='✓ Saved';setTimeout(()=>$('#msg').textContent='',2500)};
+load();
+</script>
+<script src="pro.js"></script><script src="ai-chatbot.js"></script>
+</body></html>

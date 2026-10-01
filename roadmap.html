@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="guard.js"></script>
+  <meta charset="UTF-8" />
+  <title>AI Learning Roadmap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-color: #0a0d18;
+      --panel-color: #101820e0;
+      --neon-blue: #b79cff;
+      --neon-green: #8b9bff;
+      --muted: #555a65;
+      --text-color: #d9dcef;
+    }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 60px 16px 100px; color: var(--text-color); background: var(--bg-color);
+    }
+    h1 { color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green), 0 0 20px var(--neon-green); text-align: center; }
+    .subtitle { color: var(--muted); margin-top: -10px; margin-bottom: 20px; text-align: center; }
+    .card {
+      background: var(--panel-color); border-radius: 15px;
+      box-shadow: 0 0 20px rgba(160,168,235,0.4); border: 1px solid rgba(160,168,235,0.2);
+      padding: 28px; width: min(92%, 680px); margin-bottom: 20px;
+    }
+    label { display: block; margin: 14px 0 6px; font-size: 0.9rem; color: var(--neon-blue); }
+    input {
+      width: 100%; padding: 12px; border-radius: 10px;
+      border: 1.5px solid rgba(160,168,235,0.3); background: transparent;
+      color: var(--text-color); font-size: 1rem; outline: none; font-family: inherit; box-sizing: border-box;
+    }
+    input:focus { border-color: var(--neon-blue); box-shadow: 0 0 14px var(--neon-blue); }
+    button {
+      display: block; width: 100%; padding: 14px; margin-top: 20px; border: none; border-radius: 12px;
+      background: var(--neon-blue); color: #0b1024; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; box-shadow: 0 0 20px var(--neon-blue); transition: all 0.3s ease;
+    }
+    button:hover { background: var(--neon-green); box-shadow: 0 0 30px var(--neon-green); color: #0b1024; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    #status { text-align: center; margin-top: 12px; color: var(--neon-green); min-height: 20px; }
+    #timeline { display: none; width: min(92%, 680px); }
+    .timeline-header { text-align: center; margin-bottom: 16px; }
+    .timeline-header h2 { color: var(--neon-blue); margin-bottom: 4px; }
+    .phase {
+      background: var(--panel-color); border-left: 4px solid var(--neon-green);
+      border-radius: 10px; padding: 18px 20px; margin-bottom: 16px;
+      box-shadow: 0 0 14px rgba(139,155,255,0.15);
+    }
+    .phase h3 { color: var(--neon-green); margin: 0 0 4px; }
+    .phase .duration { color: var(--muted); font-size: 0.85rem; margin-bottom: 10px; }
+    .phase ul { margin: 6px 0; padding-left: 20px; }
+    .phase a { color: var(--neon-blue); text-decoration: none; }
+    .phase a:hover { text-decoration: underline; }
+    .phase h4 { margin: 10px 0 4px; color: var(--text-color); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>🗺️ AI Learning Roadmap</h1>
+  <p class="subtitle">Get a step-by-step plan tailored to your target career.</p>
+
+  <div class="card">
+    <form id="roadmapForm">
+      <label for="targetCareer">Target career</label>
+      <input type="text" id="targetCareer" placeholder="e.g. Machine Learning Engineer" required />
+
+      <label for="skills">Your current skills (comma separated, optional)</label>
+      <input type="text" id="skills" placeholder="e.g. Python, Excel" />
+
+      <label for="interests">Your interests (comma separated, optional)</label>
+      <input type="text" id="interests" placeholder="e.g. Data, AI" />
+
+      <button type="submit" id="submitBtn">Generate Roadmap →</button>
+    </form>
+    <div id="status"></div>
+  </div>
+
+  <div id="timeline">
+    <div class="timeline-header">
+      <h2 id="careerTitle"></h2>
+      <div style="color:var(--muted);" id="totalDuration"></div>
+    </div>
+    <div id="phasesContainer"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('roadmapForm');
+    const status = document.getElementById('status');
+    const submitBtn = document.getElementById('submitBtn');
+    const timeline = document.getElementById('timeline');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedSkills = localStorage.getItem('skills');
+      const savedInterests = localStorage.getItem('interests');
+      if (savedSkills) document.getElementById('skills').value = savedSkills;
+      if (savedInterests) document.getElementById('interests').value = savedInterests;
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const targetCareer = document.getElementById('targetCareer').value.trim();
+      const skills = document.getElementById('skills').value.trim();
+      const interests = document.getElementById('interests').value.trim();
+
+      if (!targetCareer) {
+        status.textContent = '⚠️ Enter a target career.';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Generating...';
+      status.textContent = '🧠 Building your roadmap...';
+      timeline.style.display = 'none';
+
+      try {
+        const res = await fetch('http://localhost:5000/api/roadmap', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skills, interests, targetCareer }),
+        });
+        if (!res.ok) throw new Error('Request failed');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Roadmap generation failed');
+        renderRoadmap(data.roadmap);
+        status.textContent = '';
+      } catch (err) {
+        console.error(err);
+        status.textContent = '⚠️ AI unavailable, showing a generic roadmap...';
+        renderRoadmap(localRoadmap(targetCareer));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Generate Roadmap →';
+      }
+    });
+
+    function renderRoadmap(roadmap) {
+      if (window.cpLog) cpLog('roadmap', { targetCareer: roadmap.targetCareer, totalDuration: roadmap.totalDuration, skills: (document.getElementById('skills')||{}).value, interests: (document.getElementById('interests')||{}).value, phases: (roadmap.phases||[]).map(p => ({ phase: p.phase, duration: p.duration, goals: p.goals, milestones: p.milestones, resources: (p.resources||[]).map(r => r.title + ' - ' + r.url) })) });
+      document.getElementById('careerTitle').textContent = '🎯 ' + (roadmap.targetCareer || 'Your Career Path');
+      document.getElementById('totalDuration').textContent = roadmap.totalDuration ? 'Estimated total time: ' + roadmap.totalDuration : '';
+
+      const container = document.getElementById('phasesContainer');
+      container.innerHTML = (roadmap.phases || []).map((p, i) => `
+        <div class="phase">
+          <h3>Phase ${i + 1}: ${p.phase || ''}</h3>
+          <div class="duration">⏱ ${p.duration || ''}</div>
+          ${p.goals && p.goals.length ? `<h4>Goals</h4><ul>${p.goals.map(g => `<li>${g}</li>`).join('')}</ul>` : ''}
+          ${p.milestones && p.milestones.length ? `<h4>Milestones</h4><ul>${p.milestones.map(m => `<li>${m}</li>`).join('')}</ul>` : ''}
+          ${p.resources && p.resources.length ? `<h4>Resources</h4><ul>${p.resources.map(r => `<li><a href="${r.url}" target="_blank">${r.title}</a></li>`).join('')}</ul>` : ''}
+        </div>
+      `).join('');
+      timeline.style.display = 'block';
+    }
+
+    function localRoadmap(targetCareer) {
+      return {
+        targetCareer,
+        totalDuration: '6-9 months',
+        phases: [
+          {
+            phase: 'Foundations',
+            duration: '4-6 weeks',
+            goals: [`Learn the core concepts behind ${targetCareer}`],
+            milestones: ['Complete an intro course', 'Understand key terminology and tools'],
+            resources: [{ title: 'freeCodeCamp', url: 'https://www.freecodecamp.org/' }, { title: 'Coursera', url: 'https://www.coursera.org/' }],
+          },
+          {
+            phase: 'Core Skills',
+            duration: '2-3 months',
+            goals: ['Build the technical skills required day-to-day'],
+            milestones: ['Finish 2-3 focused courses or certifications', 'Complete small practice projects'],
+            resources: [{ title: 'YouTube tutorials', url: 'https://www.youtube.com/' }, { title: 'Udemy', url: 'https://www.udemy.com/' }],
+          },
+          {
+            phase: 'Applied Projects',
+            duration: '1-2 months',
+            goals: ['Apply skills to real, portfolio-worthy projects'],
+            milestones: ['Publish 2 projects on GitHub or a portfolio site'],
+            resources: [{ title: 'GitHub', url: 'https://github.com/' }],
+          },
+          {
+            phase: 'Job Readiness',
+            duration: '3-4 weeks',
+            goals: ['Prepare resume, portfolio, and interview skills'],
+            milestones: ['Tailor resume', 'Practice mock interviews', 'Apply to roles'],
+            resources: [{ title: 'LinkedIn Learning', url: 'https://www.linkedin.com/learning/' }],
+          },
+        ],
+      };
+    }
+  </script>
+  <script src="pro.js"></script>
+<script src="ai-chatbot.js"></script>
+</body>
+</html>

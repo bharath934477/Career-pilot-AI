@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="guard.js"></script>
+  <meta charset="UTF-8" />
+  <title>AI Resume & Skills Analyzer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-color: #0a0d18;
+      --panel-color: #101820e0;
+      --neon-blue: #b79cff;
+      --neon-green: #8b9bff;
+      --muted: #555a65;
+      --text-color: #d9dcef;
+      --danger: #ff6b6b;
+    }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 60px 16px 100px; color: var(--text-color); background: var(--bg-color);
+    }
+    h1 { color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green), 0 0 20px var(--neon-green); text-align: center; }
+    .subtitle { color: var(--muted); margin-top: -10px; margin-bottom: 20px; text-align: center; }
+    .card {
+      background: var(--panel-color); border-radius: 15px;
+      box-shadow: 0 0 20px rgba(160,168,235,0.4); border: 1px solid rgba(160,168,235,0.2);
+      padding: 28px; width: min(92%, 640px); margin-bottom: 20px;
+    }
+    label { display: block; margin: 14px 0 6px; font-size: 0.9rem; color: var(--neon-blue); }
+    input, textarea {
+      width: 100%; padding: 12px; border-radius: 10px;
+      border: 1.5px solid rgba(160,168,235,0.3); background: transparent;
+      color: var(--text-color); font-size: 1rem; outline: none; font-family: inherit;
+      box-sizing: border-box; resize: vertical;
+    }
+    input:focus, textarea:focus { border-color: var(--neon-blue); box-shadow: 0 0 14px var(--neon-blue); }
+    button {
+      display: block; width: 100%; padding: 14px; margin-top: 20px; border: none; border-radius: 12px;
+      background: var(--neon-blue); color: #0b1024; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; box-shadow: 0 0 20px var(--neon-blue); transition: all 0.3s ease;
+    }
+    button:hover { background: var(--neon-green); box-shadow: 0 0 30px var(--neon-green); color: #0b1024; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    #status { text-align: center; margin-top: 12px; color: var(--neon-green); min-height: 20px; }
+    #result { display: none; }
+    .score-wrap { text-align: center; margin-bottom: 20px; }
+    .score-num { font-size: 2.6rem; color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+    .score-bar { height: 12px; border-radius: 8px; background: rgba(160,168,235,0.1); overflow: hidden; margin-top: 8px; }
+    .score-fill { height: 100%; background: linear-gradient(90deg, var(--danger), var(--neon-blue), var(--neon-green)); transition: width 0.6s ease; }
+    .skills-row { display: flex; gap: 20px; flex-wrap: wrap; margin: 16px 0; }
+    .skills-col { flex: 1; min-width: 200px; }
+    .skills-col h4 { margin-bottom: 8px; }
+    .chip { display: inline-block; padding: 5px 10px; margin: 3px; border-radius: 20px; font-size: 0.8rem; }
+    .chip.matched { background: rgba(139,155,255,0.15); border: 1px solid var(--neon-green); color: var(--neon-green); }
+    .chip.missing { background: rgba(255,107,107,0.15); border: 1px solid var(--danger); color: var(--danger); }
+    .rec { border-left: 3px solid var(--neon-blue); padding: 8px 14px; margin: 10px 0; background: rgba(20,24,48,.5); border-radius: 6px; }
+    .rec a { color: var(--neon-blue); }
+    .summary { font-style: italic; color: var(--text-color); margin-top: 10px; }
+    a.backlink { color: var(--neon-blue); text-decoration: none; margin-top: 10px; display: inline-block; }
+  </style>
+</head>
+<body>
+  <h1>🩺 AI Resume &amp; Skills Analyzer</h1>
+  <p class="subtitle">Find out where you stand for your target career — and what's missing.</p>
+
+  <div class="card">
+    <form id="analyzeForm">
+      <label for="skills">Your skills (comma separated)</label>
+      <input type="text" id="skills" placeholder="e.g. Python, SQL, Excel" required />
+
+      <label for="interests">Your interests (comma separated)</label>
+      <input type="text" id="interests" placeholder="e.g. Data, Automation" />
+
+      <label for="targetCareer">Target career (optional — leave blank for best-fit suggestion)</label>
+      <input type="text" id="targetCareer" placeholder="e.g. Data Analyst" />
+
+      <label for="resumeText">Paste resume text or background summary (optional)</label>
+      <textarea id="resumeText" rows="4" placeholder="Paste a summary of your experience for a more accurate analysis..."></textarea>
+
+      <button type="submit" id="submitBtn">Analyze with AI →</button>
+    </form>
+    <div id="status"></div>
+  </div>
+
+  <div class="card" id="result">
+    <div class="score-wrap">
+      <div class="score-num" id="scoreNum">0%</div>
+      <div style="color:var(--muted);">Readiness for <span id="careerLabel" style="color:var(--neon-blue);"></span></div>
+      <div class="score-bar"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="skills-row">
+      <div class="skills-col">
+        <h4 style="color:var(--neon-green);">✅ Matched skills</h4>
+        <div id="matchedSkills"></div>
+      </div>
+      <div class="skills-col">
+        <h4 style="color:var(--danger);">⚠️ Missing skills</h4>
+        <div id="missingSkills"></div>
+      </div>
+    </div>
+
+    <h4 style="color:var(--neon-blue);">📋 Recommendations</h4>
+    <div id="recommendations"></div>
+
+    <p class="summary" id="summaryText"></p>
+    <a class="backlink" href="roadmap.html">→ Turn this into a learning roadmap</a>
+  </div>
+
+  <script>
+    const form = document.getElementById('analyzeForm');
+    const status = document.getElementById('status');
+    const submitBtn = document.getElementById('submitBtn');
+    const result = document.getElementById('result');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedSkills = localStorage.getItem('skills');
+      const savedInterests = localStorage.getItem('interests');
+      if (savedSkills) document.getElementById('skills').value = savedSkills;
+      if (savedInterests) document.getElementById('interests').value = savedInterests;
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const skills = document.getElementById('skills').value.trim();
+      const interests = document.getElementById('interests').value.trim();
+      const targetCareer = document.getElementById('targetCareer').value.trim();
+      const resumeText = document.getElementById('resumeText').value.trim();
+
+      if (!skills && !resumeText) {
+        status.textContent = '⚠️ Enter your skills or paste a resume summary.';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Analyzing...';
+      status.textContent = '🧠 Running AI analysis...';
+      result.style.display = 'none';
+
+      try {
+        const res = await fetch('http://localhost:5000/api/analyze-resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skills, interests, targetCareer, resumeText }),
+        });
+        if (!res.ok) throw new Error('Request failed');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Analysis failed');
+        renderResult(data.analysis);
+        status.textContent = '';
+      } catch (err) {
+        console.error(err);
+        status.textContent = '⚠️ AI unavailable, showing local estimate...';
+        renderResult(localAnalysis(skills, interests, targetCareer));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Analyze with AI →';
+      }
+    });
+
+    function renderResult(analysis) {
+      if (window.cpLog) cpLog('resume', { targetCareer: analysis.targetCareer, readinessScore: analysis.readinessScore, skills: (document.getElementById('skills')||{}).value, matchedSkills: analysis.matchedSkills, missingSkills: analysis.missingSkills, recommendations: (analysis.recommendations||[]).map(r => r.action) });
+      document.getElementById('careerLabel').textContent = analysis.targetCareer || 'your target career';
+      document.getElementById('scoreNum').textContent = (analysis.readinessScore ?? 0) + '%';
+      document.getElementById('scoreFill').style.width = (analysis.readinessScore ?? 0) + '%';
+
+      const matchedEl = document.getElementById('matchedSkills');
+      const missingEl = document.getElementById('missingSkills');
+      matchedEl.innerHTML = (analysis.matchedSkills || []).map(s => `<span class="chip matched">${s}</span>`).join('') || '<span style="color:var(--muted)">None listed</span>';
+      missingEl.innerHTML = (analysis.missingSkills || []).map(s => `<span class="chip missing">${s}</span>`).join('') || '<span style="color:var(--muted)">None listed</span>';
+
+      const recEl = document.getElementById('recommendations');
+      recEl.innerHTML = (analysis.recommendations || []).map(r => `
+        <div class="rec">
+          <strong>${r.action || ''}</strong><br/>
+          ${r.resource ? (r.url ? `<a href="${r.url}" target="_blank">${r.resource}</a>` : r.resource) : ''}
+        </div>
+      `).join('') || '<p style="color:var(--muted)">No specific recommendations returned.</p>';
+
+      document.getElementById('summaryText').textContent = analysis.summary || '';
+      result.style.display = 'block';
+    }
+
+    function localAnalysis(skills, interests, targetCareer) {
+      const skillList = skills ? skills.split(',').map(s => s.trim()).filter(Boolean) : [];
+      const commonByCareer = {
+        'data analyst': ['sql', 'excel', 'python', 'tableau', 'statistics'],
+        'full stack developer': ['javascript', 'react', 'node.js', 'html', 'css', 'git'],
+        'ui/ux designer': ['figma', 'prototyping', 'user research', 'wireframing'],
+        'cybersecurity analyst': ['networking', 'linux', 'firewalls', 'penetration testing'],
+        'machine learning engineer': ['python', 'tensorflow', 'pandas', 'statistics', 'sql'],
+      };
+      const career = (targetCareer || 'full stack developer').toLowerCase();
+      const required = commonByCareer[career] || ['communication', 'problem solving', 'project management'];
+      const lowerSkills = skillList.map(s => s.toLowerCase());
+      const matched = required.filter(r => lowerSkills.some(s => s.includes(r) || r.includes(s)));
+      const missing = required.filter(r => !matched.includes(r));
+      const score = Math.round((matched.length / required.length) * 100);
+      return {
+        targetCareer: targetCareer || 'Full Stack Developer',
+        readinessScore: score,
+        matchedSkills: matched,
+        missingSkills: missing,
+        recommendations: missing.slice(0, 3).map(m => ({
+          action: `Learn ${m}`,
+          resource: `Search "${m} course" on Coursera or freeCodeCamp`,
+          url: `https://www.coursera.org/search?query=${encodeURIComponent(m)}`,
+        })),
+        summary: `You match ${matched.length} of ${required.length} core skills for this path. Focus on the missing skills above to close the gap.`,
+      };
+    }
+  </script>
+  <script src="pro.js"></script>
+<script src="ai-chatbot.js"></script>
+</body>
+</html>

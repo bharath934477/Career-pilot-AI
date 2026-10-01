@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="guard.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Hub — CareerPilot AI</title>
+<style>
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;color:var(--pro-text,#e7e9f6);background:#070914;min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:30px 18px 120px}
+.hero{text-align:center;padding:40px 0 20px}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);margin:12px 0;background:linear-gradient(90deg,#8b9bff,#b79cff,#6d5efc,#8b9bff);background-size:300% 100%;
+ -webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
+@keyframes flow{to{background-position:-300% 0}}
+.hero p{color:#8b94b1;max-width:640px;margin:0 auto 18px}
+.typed{color:#8b9bff;font-family:"Inter","Segoe UI",system-ui,sans-serif;min-height:1.4em}
+.typed::after{content:"▌";animation:b 1s steps(1) infinite}@keyframes b{50%{opacity:0}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:14px;margin:26px 0}
+.stat{text-align:center}.stat b{display:block;font-size:2rem;color:#f2c46d}.stat span{color:#8b94b1;font-size:.8rem;letter-spacing:1px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.tool{text-decoration:none;color:inherit;display:block}
+.tool .ico{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:12px;
+ background:linear-gradient(135deg,rgba(139,155,255,.18),rgba(139,92,246,.18));border:1px solid rgba(160,168,235,.3)}
+.tool h3{margin:0 0 6px}.tool p{margin:0 0 12px;color:#a4acc6;font-size:.88rem;line-height:1.45}
+.tool .go{color:#b79cff;font-size:.85rem;font-weight:600}
+.pro-card{transition-delay:0s}
+.ring-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.ring{--v:0;width:130px;height:130px;border-radius:50%;background:conic-gradient(#8b9bff calc(var(--v)*1%),rgba(255,255,255,.08) 0);
+ display:flex;align-items:center;justify-content:center;transition:--v 1s}
+.ring div{width:104px;height:104px;border-radius:50%;background:#0d1120;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:#8b9bff}
+h2.sec{margin:38px 0 14px;font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:#8b94b1}
+@media(max-width:600px){.hero{padding-top:20px}.hero .pro-btn{display:block;margin:8px auto;max-width:340px}.ring{width:110px;height:110px}.ring div{width:88px;height:88px;font-size:1.3rem}.stat b{font-size:1.6rem}}
+.chips span{display:inline-block;margin:3px;padding:4px 10px;border-radius:999px;background:rgba(160,168,235,.12);border:1px solid rgba(160,168,235,.3);font-size:.8rem}
+</style></head><body>
+<div class="wrap">
+  <section class="hero">
+    <span class="pro-badge">AI-POWERED · 7 TOOLS</span>
+    <h1>Your AI Career Command Center</h1>
+    <div class="typed" id="typed"></div>
+    <p>Discover careers, close skill gaps, build a roadmap, practise interviews and write cover letters — all in one place.</p>
+    <a class="pro-btn" href="career-match.html">Find my best-fit careers →</a>
+    <a class="pro-btn ghost" href="interview-coach.html">Start a mock interview</a>
+  </section>
+
+  <div class="stats">
+    <div class="pro-card stat"><b data-c="7">0</b><span>AI tools</span></div>
+    <div class="pro-card stat"><b data-c="50" data-s="+">0</b><span>Career paths</span></div>
+    <div class="pro-card stat"><b data-c="24" data-s="/7">0</b><span>AI advisor</span></div>
+    <div class="pro-card stat"><b data-c="100" data-s="%">0</b><span>Personalized</span></div>
+  </div>
+
+  <h2 class="sec">Your profile</h2>
+  <div class="pro-card ring-wrap">
+    <div class="ring" id="ring"><div id="ringTxt">—</div></div>
+    <div style="flex:1;min-width:220px">
+      <h3 style="margin:0 0 6px">Profile completeness</h3>
+      <p style="color:#a4acc6;margin:0 0 10px;font-size:.9rem" id="ringMsg">Add your skills & interests to unlock personalised AI results.</p>
+      <div class="chips" id="chips"></div>
+      <p style="margin:12px 0 0"><a class="pro-btn ghost" href="skills-interests.html">Edit skills & interests</a></p>
+    </div>
+  </div>
+
+  <h2 class="sec">AI tools</h2>
+  <div class="grid">
+    <a class="pro-card tool" href="career-match.html"><div class="ico">🎯</div><h3>AI Career Match</h3><p>Radar chart of your strengths plus ranked careers with salary range and demand.</p><span class="go">Open →</span></a>
+    <a class="pro-card tool" href="resume-analyzer.html"><div class="ico">🩺</div><h3>Skill Gap Analyzer</h3><p>Readiness score, matched vs missing skills, and learning recommendations.</p><span class="go">Open →</span></a>
+    <a class="pro-card tool" href="roadmap.html"><div class="ico">🗺️</div><h3>Learning Roadmap</h3><p>Phase-by-phase plan with goals, milestones and resources.</p><span class="go">Open →</span></a>
+    <a class="pro-card tool" href="interview-coach.html"><div class="ico">🎤</div><h3>Mock Interview Coach</h3><p>AI asks questions, scores your answers on clarity, relevance and confidence.</p><span class="go">Open →</span></a>
+    <a class="pro-card tool" href="cover-letter.html"><div class="ico">✉️</div><h3>Cover Letter Generator</h3><p>Tailored letters in the tone you choose. Copy or download in one click.</p><span class="go">Open →</span></a>
+    <a class="pro-card tool" href="skills-interests.html"><div class="ico">🧭</div><h3>Career Suggestions</h3><p>AI-suggested paths from your skills and interests, with courses.</p><span class="go">Open →</span></a>
+  </div>
+  <p style="text-align:center;color:#8b94b1;margin-top:30px;font-size:.85rem">💬 Tip: the chat assistant in the bottom-right corner is available on every page.</p>
+</div>
+<script>
+const lines=['Analyzing skills & goals…','Mapping your career graph…','Generating your personalised plan…'];
+let li=0,ci=0,del=false;const t=document.getElementById('typed');
+(function tick(){const L=lines[li];ci+=del?-1:1;t.textContent=L.slice(0,ci);
+ if(!del&&ci===L.length){del=true;return setTimeout(tick,1100)}
+ if(del&&ci===0){del=false;li=(li+1)%lines.length}
+ setTimeout(tick,del?22:45)})();
+addEventListener('load',()=>{
+ document.querySelectorAll('[data-c]').forEach(el=>proCount(el,+el.dataset.c,1400,el.dataset.s||''));
+ const skills=(localStorage.getItem('skills')||'').split(',').map(s=>s.trim()).filter(Boolean);
+ const ints=(localStorage.getItem('interests')||'').split(',').map(s=>s.trim()).filter(Boolean);
+ const pct=Math.min(100,(skills.length?40:0)+(ints.length?30:0)+Math.min(30,skills.length*6));
+ document.getElementById('chips').innerHTML=[...skills,...ints].map(s=>`<span>${proEsc(s)}</span>`).join('');
+ const ring=document.getElementById('ring');let v=0;
+ (function a(){v=Math.min(pct,v+2);ring.style.setProperty('--v',v);document.getElementById('ringTxt').textContent=v+'%';if(v<pct)requestAnimationFrame(a)})();
+ if(pct>=70)document.getElementById('ringMsg').textContent='Great — your profile is ready for AI matching.';
+});
+</script>
+<script src="pro.js"></script><script src="ai-chatbot.js"></script>
+</body></html>

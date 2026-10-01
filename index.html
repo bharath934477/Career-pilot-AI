@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title> Career And Educations Ideas</title>
+  <style>
+    :root{
+      --bg:#04121a;
+      --panel:#081520;
+      --neon-green:#00ff9c;
+      --neon-blue:#00bfff;
+      --muted:#6f8a94;
+      --glass: rgba(255,255,255,0.03);
+      --accent-glow: 0 8px 40px rgba(0,191,255,0.06), inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family: "Roboto Mono", "Courier New", monospace;
+      background:
+        radial-gradient(ellipse at 10% 10%, rgba(0,191,255,0.03), transparent 8%),
+        linear-gradient(180deg,#021021 0%, var(--bg) 40%, #01060a 100%);
+      color: #cfeff6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px;
+      overflow:hidden;
+    }
+
+    .matrix {
+      position: fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(0deg, rgba(0,0,0,0.22) 1px, transparent 1px),
+        repeating-linear-gradient(90deg, rgba(0,255,156,0.02), rgba(0,255,156,0.02) 2px, transparent 2px, transparent 14px);
+      background-size: 100% 30px, 40px 100%;
+      mix-blend-mode: screen;
+      opacity:0.22;
+    }
+    .binary {
+      position:absolute; inset:0;
+      background: repeating-linear-gradient(0deg, rgba(0,255,156,0.02), rgba(0,255,156,0.02) 1px, transparent 1px, transparent 8px);
+      animation: scroll 14s linear infinite;
+      opacity:0.12;
+      mix-blend-mode: overlay;
+    }
+    @keyframes scroll { from { background-position:0 0 } to { background-position:0 800px } }
+
+    .scanlines {
+      position: fixed; inset:0; pointer-events:none; z-index:3;
+      background-image: linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
+      background-size: 100% 4px;
+      opacity:0.28;
+      mix-blend-mode:multiply;
+    }
+
+    .card {
+      position:relative;
+      z-index:5;
+      width:clamp(320px, 72vw, 980px);
+      max-width:1200px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;
+      padding:36px 48px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      box-shadow: 0 24px 60px rgba(0, 255, 38, 0.7), 0 6px 20px rgba(0,191,255,0.02);
+      border: 1px solid rgba(0,191,255,0.06);
+      backdrop-filter: blur(6px);
+    }
+
+    .title {
+      font-size: clamp(18px, 4.8vw, 56px);
+      line-height:1;
+      color: var(green);
+      letter-spacing: 1.4px;
+      margin: 6px 0 12px 0;
+      text-shadow: 0 0 12px rgba(0, 255, 119, 0.895);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+    }
+    .title .glitch {
+      position:relative;
+      display:inline-block;
+    }
+    .glitch::before,.glitch::after{
+      content:attr(data-text);
+      position:absolute;left:0;top:0;
+      opacity:0.8;pointer-events:none;
+    }
+    .glitch::before{ color:var(--neon-blue); transform:translate(2px,-1px); mix-blend-mode:screen; }
+    .glitch::after{ color: #00ffb3; transform:translate(-2px,1px); mix-blend-mode:screen; }
+    .subtitle {
+      margin-top:6px;
+      color:var(white);
+      font-size: clamp(12px,1.6vw,20px);
+      letter-spacing: 0.9px;
+    }
+
+    .type-line{
+      margin-top:14px;
+      color:#eafff5;
+      font-size:clamp(12px,1.6vw,18px);
+      min-height:1.2em;
+      border-right:2px solid rgba(255,255,255,0.08);
+      padding-right:6px;
+      animation: caret 1s steps(1) infinite;
+    }
+    @keyframes caret { 50% { border-color: transparent; } }
+
+    .btn {
+      margin-top:30px;
+      display:inline-block;
+      padding:14px 32px;
+      border-radius:999px;
+      text-decoration:none;
+      font-weight:700;
+      letter-spacing:1px;
+      color: #ffffff;
+      background: linear-gradient(90deg, rgba(0,255,156,0.08), rgba(0,191,255,0.08));
+      border:1px solid rgba(0,255,156,0.14);
+      box-shadow: 0 10px 40px rgb(9, 255, 0);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn:hover{ transform: translateY(-6px); box-shadow: 0 18px 60px rgba(0,191,255,0.12); }
+
+    .sidelabels{ position:absolute; inset:0; pointer-events:none; z-index:2; display:flex; justify-content:space-between; align-items:center; padding:18px; }
+    .sidelabels .left, .sidelabels .right { color:rgba(0,255,156,0.12); font-size:12px; transform:rotate(-90deg); letter-spacing:2px; }
+    .sidelabels .right{ transform:rotate(90deg); }
+
+    @media (max-width:720px){
+      .card{ padding:24px 18px }
+      .sidelabels { display:none }
+    }
+  </style>
+</head>
+<body>
+  <div class="matrix" aria-hidden="true">
+    <div class="binary"></div>
+  </div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <div class="card" role="main" aria-labelledby="mainTitle">
+    <div class="sidelabels" aria-hidden="true">
+      <div class="left">SECURE • PRIVACY-FIRST</div>
+      <div class="right">ANALYTICS • SKILL-MAP</div>
+    </div>
+
+    <h1 id="mainTitle" class="title">
+      <span class="glitch" data-text="ONE‑STOP CAREER &amp; EDUCATION ADVISOR">ONE‑STOP CAREER &amp; EDUCATION ADVISOR</span>
+    </h1>
+
+    <div class="subtitle">ANALYZING SKILLS &amp; GOALS</div>
+
+    <div class="type-line" id="typeLine" aria-live="polite" role="status"></div>
+
+    <a class="btn" href="front.html" id="goBtn" role="button" aria-label="Open portal">LET'S GO →</a>
+  </div>
+
+  <script>
+    const lines = [
+      'Initializing secure session...',
+      'Scanning skills & interests...',
+      'Personalizing career pathways...',
+      'Encrypting local profile...'
+    ];
+    let li = 0, ch = 0, forward = true;
+    const el = document.getElementById('typeLine');
+
+    function typeTick() {
+      const txt = lines[li];
+      if (forward) {
+        ch++;
+        el.textContent = txt.slice(0,ch);
+        if (ch === txt.length) {
+          forward = false;
+          setTimeout(typeTick, 900);
+          return;
+        }
+      } else {
+        ch--;
+        el.textContent = txt.slice(0,ch);
+        if (ch === 0) {
+          forward = true;
+          li = (li + 1) % lines.length;
+        }
+      }
+      setTimeout(typeTick, forward ? 36 : 18);
+    }
+    typeTick();
+
+    const btn = document.getElementById('goBtn');
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') btn.click();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') document.querySelector('.btn').style.outline = '3px solid rgba(0,191,255,0.12)';
+    });
+  </script>
+<script src="pro.js"></script>
+</body>
+</html>

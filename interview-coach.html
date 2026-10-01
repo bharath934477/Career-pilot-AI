@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="guard.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Mock Interview Coach</title>
+<style>
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;color:#e7e9f6;background:#070914;min-height:100vh}
+.wrap{max-width:820px;margin:0 auto;padding:24px 16px 120px}
+h1{text-align:center;color:#8b9bff;text-shadow:0 0 18px rgba(139,155,255,.45)}
+.sub{text-align:center;color:#8b94b1;margin:-8px 0 22px}
+label{display:block;margin:12px 0 5px;font-size:.85rem;color:#b79cff}
+input,select,textarea{width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1.5px solid rgba(160,168,235,.3);background:rgba(0,0,0,.25);color:#e7e9f6;font:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#b79cff;box-shadow:0 0 14px rgba(160,168,235,.5)}
+select option{background:#0d1120}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.row{grid-template-columns:1fr}}
+.qbox{border-left:4px solid #6d5efc;padding:14px 16px;background:rgba(139,92,246,.08);border-radius:10px;margin:10px 0}
+.qbox small{color:#c9b6ff;letter-spacing:1px;text-transform:uppercase}
+.qbox h3{margin:6px 0}.tip{color:#8b94b1;font-size:.85rem}
+.bars{display:grid;gap:10px;margin:14px 0}.bar span{font-size:.8rem;color:#a4acc6;display:flex;justify-content:space-between}
+.bar i{display:block;height:8px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px}
+.bar i b{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#8b9bff,#b79cff);transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.big{font-size:3rem;font-weight:800;color:#8b9bff;text-align:center;line-height:1}
+ul.l{margin:6px 0;padding-left:20px}ul.l li{margin:4px 0}
+.good li::marker{color:#8b9bff}.bad li::marker{color:#f2c46d}
+.mic{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.hist span{padding:3px 9px;border-radius:999px;background:rgba(139,155,255,.12);border:1px solid rgba(139,155,255,.3);font-size:.78rem}
+#status{text-align:center;color:#8b9bff;min-height:22px;margin-top:10px}
+.hidden{display:none}
+</style></head><body>
+<div class="wrap">
+  <h1>🎤 AI Mock Interview Coach</h1>
+  <p class="sub">Practice real questions. Get scored instantly with strengths and improvements.</p>
+
+  <div class="pro-card" id="setup">
+    <div class="row">
+      <div><label>Target role</label><input id="role" placeholder="e.g. Data Analyst" value=""></div>
+      <div><label>Level</label><select id="level"><option>Fresher</option><option>Junior</option><option>Mid-level</option><option>Senior</option></select></div>
+    </div>
+    <label>Question type</label>
+    <select id="type"><option value="mixed">Mixed</option><option value="behavioral">Behavioral (STAR)</option><option value="technical">Technical</option><option value="HR">HR / Culture fit</option></select>
+    <p><button class="pro-btn" id="start" style="width:100%;margin-top:16px">Start interview →</button></p>
+  </div>
+
+  <div id="session" class="hidden">
+    <div class="pro-card">
+      <div class="qbox"><small id="cat">Question</small><h3 id="q"></h3><div class="tip" id="tip"></div></div>
+      <label>Your answer <span class="mic" id="mic" title="Speak your answer">🎙️ dictate</span></label>
+      <textarea id="ans" rows="6" placeholder="Type or dictate your answer…"></textarea>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button class="pro-btn" id="submit" style="flex:1">Get AI feedback</button>
+        <button class="pro-btn ghost" id="skip">Skip / next question</button>
+      </div>
+      <div id="status"></div>
+    </div>
+    <div class="pro-card hidden" id="fb" style="margin-top:16px">
+      <div class="big" id="score">0</div><div style="text-align:center;color:#8b94b1;margin-bottom:6px">overall score</div>
+      <div class="bars" id="bars"></div>
+      <h4 style="margin:12px 0 4px;color:#8b9bff">Strengths</h4><ul class="l good" id="str"></ul>
+      <h4 style="margin:12px 0 4px;color:#f2c46d">Improve</h4><ul class="l bad" id="imp"></ul>
+      <h4 style="margin:12px 0 4px;color:#b79cff">Model answer</h4><p id="model" style="color:#b7d5e0;line-height:1.5"></p>
+      <button class="pro-btn" id="next" style="width:100%;margin-top:10px">Next question →</button>
+    </div>
+    <div class="pro-card" style="margin-top:16px"><b>Session scores</b><div class="hist" id="hist"><span style="opacity:.6">none yet</span></div>
+      <div id="avg" style="margin-top:8px;color:#a4acc6"></div></div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let asked=[],scores=[],cur=null;
+const BANK={behavioral:['Tell me about a time you handled a tight deadline.','Describe a conflict in a team and how you resolved it.','Tell me about a mistake you made and what you learned.'],
+ technical:['Explain a project you built end to end and the key technical decisions.','How would you debug a problem you have never seen before?','What trade-offs do you consider when choosing a tool or technology?'],
+ HR:['Why do you want this role?','Where do you see yourself in five years?','What are your greatest strengths and weaknesses?']};
+function localQ(){const t=$('type').value,pool=t==='mixed'?Object.values(BANK).flat():BANK[t];
+  const left=pool.filter(q=>!asked.includes(q));const q=(left.length?left:pool)[Math.floor(Math.random()*(left.length||pool.length))];
+  return{question:q,category:t==='mixed'?'General':t,tip:'Use the STAR method: Situation, Task, Action, Result.'}}
+function localEval(a){const w=a.trim().split(/\s+/).length,has=r=>r.test(a);
+  let s=30+Math.min(30,w/2)+(has(/\d/)?8:0)+(has(/because|result|learn|achiev|improv/i)?8:0)+(has(/\bI\b/)?4:0);s=Math.min(95,Math.round(s));
+  return{score:s,clarity:Math.min(95,s-2),relevance:Math.min(95,s+3),confidence:Math.min(95,s-5),
+   strengths:[w>40?'Good level of detail':'Concise delivery',has(/\d/)?'Used measurable results':'Clear structure'],
+   improvements:[w<40?'Expand with a concrete example':'Tighten to ~90 seconds',has(/\d/)?'Add the business impact':'Add numbers or metrics to show impact'],
+   modelAnswer:'Open with context, explain your specific actions, and finish with a measurable result and what you learned.'}}
+async function getQ(){
+  $('fb').classList.add('hidden');$('ans').value='';$('q').innerHTML='<div class="shimmer" style="height:22px;width:80%"></div>';
+  let d;try{d=await proPost('/api/interview/question',{role:$('role').value,level:$('level').value,type:$('type').value,asked});if(!d.success)throw 0}catch{d=localQ()}
+  cur=d;asked.push(d.question);$('q').textContent=d.question;$('cat').textContent=d.category||'Question';$('tip').textContent='💡 '+(d.tip||'');
+}
+$('start').onclick=()=>{if(!$('role').value.trim()){proToast('Enter a target role first');return}
+  $('setup').classList.add('hidden');$('session').classList.remove('hidden');getQ()};
+$('skip').onclick=getQ;$('next').onclick=getQ;
+$('submit').onclick=async()=>{const a=$('ans').value.trim();if(a.length<10){proToast('Write a bit more first');return}
+  $('submit').disabled=true;$('status').textContent='🧠 Evaluating your answer…';let e;
+  try{const d=await proPost('/api/interview/evaluate',{role:$('role').value,question:cur.question,answer:a});if(!d.success)throw 0;e=d.evaluation}catch{e=localEval(a);$('status').textContent='AI offline — showing local estimate'}
+  $('submit').disabled=false;if($('status').textContent.startsWith('🧠'))$('status').textContent='';
+  $('fb').classList.remove('hidden');proCount($('score'),e.score,900);
+  $('bars').innerHTML=[['Clarity',e.clarity],['Relevance',e.relevance],['Confidence',e.confidence]].map(([n,v])=>`<div class="bar"><span>${n}<b>${v}</b></span><i><b data-w="${v}"></b></i></div>`).join('');
+  requestAnimationFrame(()=>document.querySelectorAll('.bar i b').forEach(b=>b.style.width=b.dataset.w+'%'));
+  $('str').innerHTML=(e.strengths||[]).map(x=>`<li>${proEsc(x)}</li>`).join('');$('imp').innerHTML=(e.improvements||[]).map(x=>`<li>${proEsc(x)}</li>`).join('');
+  $('model').textContent=e.modelAnswer||'';scores.push(e.score);if(window.cpLog)cpLog('interview',{role:$('role').value,level:$('level').value,type:$('type').value,question:cur.question,answer:a,score:e.score,clarity:e.clarity,relevance:e.relevance,confidence:e.confidence,strengths:e.strengths,improvements:e.improvements});
+  $('hist').innerHTML=scores.map((s,i)=>`<span>Q${i+1}: ${s}</span>`).join('');
+  $('avg').textContent='Average: '+Math.round(scores.reduce((a,b)=>a+b,0)/scores.length)+'/100';
+  $('fb').scrollIntoView({behavior:'smooth',block:'center'});
+};
+// dictation (Web Speech API, where supported)
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec;
+$('mic').onclick=()=>{if(!SR){proToast('Dictation not supported in this browser');return}
+  if(rec){rec.stop();rec=null;$('mic').textContent='🎙️ dictate';return}
+  rec=new SR();rec.continuous=true;rec.interimResults=false;rec.lang='en-US';
+  rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)$('ans').value+=e.results[i][0].transcript+' '};
+  rec.onend=()=>{rec=null;$('mic').textContent='🎙️ dictate'};rec.start();$('mic').textContent='🔴 listening…'};
+</script>
+<script src="pro.js"></script><script src="ai-chatbot.js"></script>
+</body></html>

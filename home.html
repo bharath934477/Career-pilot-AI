@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="guard.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Home — CareerPilot AI</title>
+<style>
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;color:var(--pro-text,#e7e9f6);background:#070914;min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:26px 18px 120px}
+.hero{text-align:center;padding:34px 0 18px}
+.hero h1{font-size:clamp(2rem,5vw,3.3rem);margin:14px 0 10px;background:linear-gradient(90deg,#8b9bff,#b79cff,#6d5efc,#8b9bff);background-size:300% 100%;
+ -webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
+@keyframes flow{to{background-position:-300% 0}}
+.hero .typed{color:#8b9bff;min-height:1.4em}.hero .typed::after{content:"▌";animation:b 1s steps(1) infinite}@keyframes b{50%{opacity:0}}
+.hero p{color:#a4acc6;max-width:680px;margin:12px auto 20px;line-height:1.6}
+.hero .pro-btn{margin:5px}
+h2.sec{margin:38px 0 14px;font-size:1.05rem;letter-spacing:2px;text-transform:uppercase;color:#8b94b1}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.step .n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#0b1024;background:linear-gradient(135deg,#8b9bff,#b79cff);margin-bottom:10px}
+.step h3{margin:0 0 6px}.step p{margin:0 0 12px;color:#a4acc6;font-size:.88rem;line-height:1.5}
+.step a{color:#b79cff;font-size:.85rem;font-weight:600;text-decoration:none}
+.me{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.me .av{width:84px;height:84px;font-size:1.8rem}
+.me h3{margin:0 0 4px;font-size:1.25rem}.me .em{color:#8b94b1;font-size:.88rem;word-break:break-all}
+.pill{display:inline-block;margin:8px 6px 0 0;padding:3px 11px;border-radius:999px;font-size:.74rem;background:rgba(242,196,109,.12);border:1px solid rgba(242,196,109,.35);color:#f2c46d}
+.me .acts{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:14px}
+.stat{text-align:center}.stat b{display:block;font-size:2rem;color:#f2c46d}.stat span{color:#8b94b1;font-size:.78rem;letter-spacing:1px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:18px}
+.tool{text-decoration:none;color:inherit;display:block}
+.tool .ico{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;margin-bottom:12px;color:var(--c);
+ background:rgba(255,255,255,.05);background:color-mix(in srgb,var(--c) 15%,transparent);border:1px solid rgba(255,255,255,.12);border:1px solid color-mix(in srgb,var(--c) 35%,transparent);transition:.25s}
+.tool:hover .ico{background:var(--c);color:#0b1024;box-shadow:0 0 22px var(--c)}
+.tool h3{margin:0 0 6px}.tool p{margin:0 0 12px;color:#a4acc6;font-size:.88rem;line-height:1.45}.tool .go{color:#b79cff;font-size:.85rem;font-weight:600}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.why div{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(160,168,235,.18);color:#c3c9e4;font-size:.88rem;line-height:1.5}
+.why b{display:block;color:#fff;margin-bottom:4px}
+.tip{text-align:center;color:#8b94b1;margin-top:30px;font-size:.85rem}
+</style></head><body>
+<div class="wrap">
+  <section class="hero">
+    <span class="pro-badge" id="badge">ACCOUNT READY</span>
+    <h1 id="hello">Welcome to CareerPilot AI</h1>
+    <div class="typed" id="typed"></div>
+    <p id="intro">CareerPilot AI is your personal career &amp; education advisor. Tell us your skills and interests and our AI will suggest the best career paths, close your skill gaps, build a learning roadmap, coach your interviews and write your cover letters.</p>
+    <a class="pro-btn" id="cta1" href="skills-interests.html">Start with my skills &amp; interests →</a>
+    <a class="pro-btn ghost" href="dashboard.html">Open AI Hub</a>
+  </section>
+
+  <h2 class="sec">Your account</h2>
+  <div class="pro-card me">
+    <div class="av" data-cp-avatar>?</div>
+    <div>
+      <h3 id="meName">—</h3><div class="em" id="meMail"></div>
+      <span class="pill" id="meRole"></span><span class="pill" id="meSince"></span>
+    </div>
+    <div class="acts">
+      <button class="pro-btn" type="button" onclick="cpPickPhoto()">📷 Add profile photo</button>
+      <a class="pro-btn ghost" href="profile.html">Edit profile</a>
+    </div>
+  </div>
+
+  <h2 class="sec">Get started in 3 steps</h2>
+  <div class="steps">
+    <div class="pro-card step"><div class="n">1</div><h3>Add skills &amp; interests</h3><p>The more the AI knows about you, the better your career matches and plans become.</p><a id="s1" href="skills-interests.html">Add now →</a></div>
+    <div class="pro-card step"><div class="n">2</div><h3>Get AI career matches</h3><p>See your strengths on a radar chart and a ranked list of careers with salary range and demand.</p><a href="career-match.html">Find my match →</a></div>
+    <div class="pro-card step"><div class="n">3</div><h3>Plan &amp; practise</h3><p>Build a phase-by-phase roadmap, rehearse mock interviews and generate cover letters.</p><a href="roadmap.html">Build my roadmap →</a></div>
+  </div>
+
+  <h2 class="sec">Everything in one place</h2>
+  <div class="grid" id="tools"></div>
+
+  <h2 class="sec">Why CareerPilot AI</h2>
+  <div class="pro-card"><div class="stats">
+    <div class="stat"><b data-c="7">0</b><span>AI tools</span></div>
+    <div class="stat"><b data-c="50" data-s="+">0</b><span>Career paths</span></div>
+    <div class="stat"><b data-c="24" data-s="/7">0</b><span>AI advisor</span></div>
+    <div class="stat"><b data-c="100" data-s="%">0</b><span>Personalized</span></div>
+  </div></div>
+  <div class="why" style="margin-top:16px">
+    <div><b>🎯 Personalized</b>Every suggestion is built from your own skills, interests and goals.</div>
+    <div><b>🔒 Private</b>Your password is hashed and your profile stays in your account.</div>
+    <div><b>⚡ Fast &amp; practical</b>Clear next steps — courses, milestones and resources — not just advice.</div>
+    <div><b>💬 Always on</b>Ask the chat assistant (bottom-right) anything, on any page.</div>
+  </div>
+  <p class="tip">💡 Tip: use the menu on the left to jump between tools, and your profile picture (top-right) to manage your account.</p>
+</div>
+<script src="pro.js"></script>
+<script>
+const S=(window.cpSession&&cpSession())||{};
+const first=String(S.name||'friend').trim().split(/\s+/)[0];
+const grad=S.role==='graduate';
+document.getElementById('hello').textContent='Welcome to CareerPilot AI, '+first+'!';
+document.getElementById('badge').textContent=(grad?'GRADUATE':'STUDENT')+' · ACCOUNT READY';
+document.getElementById('meName').textContent=S.name||'My account';
+document.getElementById('meMail').textContent=S.email||'';
+document.getElementById('meRole').textContent=grad?'🚀 Graduate':'🎓 Student';
+try{const A=JSON.parse(localStorage.getItem('cp_accounts')||'{}'),a=A[(S.role||'student')+':'+String(S.email).toLowerCase()];
+ document.getElementById('meSince').textContent=a&&a.createdAt?'Member since '+new Date(a.createdAt).toLocaleDateString([], {dateStyle:'medium'}):'Welcome aboard';}catch{document.getElementById('meSince').textContent='Welcome aboard'}
+const careers=window.cpCareersHref||'skills-interests.html';
+document.getElementById('cta1').href=careers;document.getElementById('s1').href=careers;
+if(grad)document.getElementById('intro').textContent='Ready to launch your career? Tell us about your degree, skills and goals — CareerPilot AI will analyse your skill gaps, rank your best-fit roles, build your upskilling roadmap and prepare you for interviews.';
+
+const TOOLS=[
+ ['career-match.html','Career Match','target','#34d399','Radar chart of your strengths plus ranked careers with salary range and demand.'],
+ ['resume-analyzer.html','Skill Gap Analyzer','pulse','#ff7a93','Readiness score, matched vs missing skills and learning recommendations.'],
+ ['roadmap.html','Learning Roadmap','route','#5eead4','Phase-by-phase plan with goals, milestones and resources.'],
+ ['interview-coach.html','Mock Interview Coach','mic','#fb923c','AI asks questions and scores your answers on clarity, relevance and confidence.'],
+ ['cover-letter.html','Cover Letter Generator','mail','#a78bfa','Tailored letters in the tone you choose. Copy or download in one click.'],
+ [careers,'Career Suggestions','compass','#4cc9f0','AI-suggested paths from your skills and interests, with courses.']];
+document.getElementById('tools').innerHTML=TOOLS.map(([h,t,ic,c,d])=>`<a class="pro-card tool" href="${h}" style="--c:${c}"><div class="ico">${PRO_ICON(ic,26)}</div><h3>${t}</h3><p>${d}</p><span class="go">Open →</span></a>`).join('');
+
+const lines=['Analyzing skills & goals…','Mapping your career graph…','Generating your personalised plan…'];
+let li=0,ci=0,del=false;const t=document.getElementById('typed');
+(function tick(){const L=lines[li];ci+=del?-1:1;t.textContent=L.slice(0,ci);
+ if(!del&&ci===L.length){del=true;return setTimeout(tick,1100)}
+ if(del&&ci===0){del=false;li=(li+1)%lines.length}
+ setTimeout(tick,del?22:45)})();
+addEventListener('load',()=>document.querySelectorAll('[data-c]').forEach(el=>proCount(el,+el.dataset.c,1400,el.dataset.s||'')));
+</script>
+<script src="ai-chatbot.js"></script>
+</body></html>

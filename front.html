@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Career Advisor - Secure Portal</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#070914;
+      --panel:#0d1120;
+      --neon:#8b9bff;
+      --accent:#b79cff;
+      --muted:#8b94b1;
+      --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      padding:0;
+      font-family: "Inter","Segoe UI",system-ui,sans-serif;
+      background: radial-gradient(ellipse at 10% 10%, rgba(160,168,235,0.04), transparent 10%),
+                  radial-gradient(ellipse at 90% 90%, rgba(139,155,255,0.02), transparent 10%),
+                  var(--bg);
+      color: #cfeef6;
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .matrix {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: linear-gradient(0deg, rgba(0,0,0,0.25) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 100% 30px, 30px 100%;
+      opacity: 0.35;
+      mix-blend-mode: screen;
+    }
+    .binary {
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(0deg, rgba(139,155,255,0.02), rgba(139,155,255,0.02) 1px, transparent 1px, transparent 6px);
+      animation: scrollBinary 12s linear infinite;
+      mix-blend-mode: overlay;
+      opacity: 0.15;
+    }
+    @keyframes scrollBinary {
+      from { background-position: 0 0; }
+      to   { background-position: 0 800px; }
+    }
+
+    .top-border{
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: calc(100% - 48px);
+      max-width: 1100px;
+      height: 68px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(160,168,235,0.06);
+      display:flex;
+      align-items:center;
+      gap:16px;
+      padding: 12px 20px;
+      box-shadow: 0 8px 30px rgba(2,10,20,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      backdrop-filter: blur(6px);
+    }
+    .logo-dot{
+      width:46px;height:46px;border-radius:6px;
+      background: linear-gradient(135deg,var(--neon), var(--accent));
+      box-shadow: 0 4px 18px rgba(160,168,235,0.12), 0 0 18px rgba(139,155,255,0.06);
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#001;
+      font-family:inherit;
+    }
+    .title{
+      font-size:1.25rem;
+      color:var(--neon);
+      letter-spacing:0.6px;
+      text-shadow: 0 0 12px rgba(139,155,255,0.12);
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+    }
+    .title small{
+      color:var(--muted);
+      font-size:0.73rem;
+      letter-spacing:0.6px;
+    }
+
+    .type {
+      display:inline-block;
+      border-right:2px solid rgba(255,255,255,0.12);
+      padding-right:6px;
+      margin-left:6px;
+      animation: blink 0.9s step-end infinite;
+      color: #e7fff5;
+      font-weight:600;
+    }
+    @keyframes blink { 50% { border-color: transparent; } }
+
+    .main {
+      position: relative;
+      z-index: 2;
+      margin-top: 120px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 24px 120px;
+      gap:40px;
+    }
+
+    .panel {
+      width: 340px;
+      min-height: 360px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border-radius: 14px;
+      border: 1px solid rgba(160,168,235,0.06);
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(4,12,25,0.6);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:18px;
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+      backdrop-filter: blur(6px);
+    }
+
+    .panel:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 30px 80px rgba(2,8,30,0.75);
+      border-color: rgba(160,168,235,0.18);
+    }
+
+    .avatar {
+      width:200px;height:200px;border-radius:14px;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      position:relative;
+      border:1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.6);
+      background: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(255,255,255,0.02));
+    }
+
+    .avatar img{
+      width:100%;height:100%;object-fit:cover;display:block;
+      filter: grayscale(.15) contrast(1.03) saturate(.9) hue-rotate(50deg);
+      transform-origin:center;
+    }
+    .avatar::after{
+      content:"";
+      position:absolute;left:0;right:0;top:0;height:100%;
+      background: linear-gradient(180deg, rgba(139,155,255,0.02), transparent 20%, rgba(160,168,235,0.02));
+      pointer-events:none;
+      mix-blend-mode:overlay;
+    }
+
+    .role {
+      font-size:1.15rem;
+      color: #bfffe6;
+      letter-spacing:0.6px;
+      margin:0;
+    }
+    .sub {
+      font-size:0.85rem;color:var(--muted);
+      margin:0;
+    }
+
+    .enter-btn{
+      margin-top:6px;
+      background: linear-gradient(90deg, rgba(139,155,255,0.06), rgba(160,168,235,0.06));
+      color: var(--neon);
+      border: 1px solid rgba(139,155,255,0.12);
+      padding: 10px 18px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-block;
+      transition: transform .12s ease, box-shadow .12s ease;
+      box-shadow: 0 6px 20px rgba(160,168,235,0.06);
+    }
+    .enter-btn:hover{ transform: translateY(-3px); box-shadow: 0 12px 30px rgba(160,168,235,0.12); }
+
+    .hint {
+      font-size:0.75rem;color:#7fa6a2;margin-top:6px;
+      letter-spacing:0.4px;
+    }
+
+    @media (max-width:880px){
+      .main{flex-direction:column;align-items:center;margin-top:110px}
+      .panel{width:92%;max-width:520px}
+    }
+
+    .scanlines{
+      position: fixed; inset: 0; z-index: 3; pointer-events:none;
+      background-image: linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
+      background-size: 100% 4px;
+      mix-blend-mode: multiply;
+      opacity:0.35;
+    }
+
+    .glitch {
+      position: relative;
+      display:inline-block;
+      color:var(--neon);
+      text-shadow: 0 0 12px rgba(139,155,255,0.12);
+    }
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0; top: 0;
+      opacity: 0.75;
+      clip-path: inset(0 0 0 0);
+    }
+    .glitch::before { color: #b79cff; z-index:-1; transform:translate(2px, -1px); mix-blend-mode:screen; }
+    .glitch::after  { color: #8b9bff; z-index:-2; transform:translate(-2px, 1px); mix-blend-mode:screen; }
+    .glitch:hover::before, .glitch:hover::after { animation: glitchAnim 0.5s steps(2, end); }
+    @keyframes glitchAnim {
+      0% { transform: translate(2px,-1px); clip-path: inset(0 0 0 0); }
+      50% { transform: translate(-6px,4px); clip-path: inset(30% 0 55% 0); }
+      100% { transform: translate(2px,-1px); clip-path: inset(0 0 0 0); }
+    }
+
+    .top-border{display:none!important}
+    .main{margin-top:20px!important}
+    .ai-cta{text-align:center;position:relative;z-index:2;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="matrix" aria-hidden="true">
+    <div class="binary"></div>
+  </div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <div class="top-border" role="banner" aria-label="Site header">
+    <div class="logo-dot" aria-hidden="true">CA</div>
+    <div class="title" aria-hidden="false">
+      <div><span class="glitch" data-text="One-Stop Career & Education Advisor">One-Stop Career & Education Advisor</span>
+        <span class="type" id="type-text"></span></div>
+      <small>Secure portal • personalized paths • privacy-first</small>
+    </div>
+  </div>
+
+  <div class="ai-cta"><span class="pro-badge">NEW · 7 AI TOOLS</span><p><a class="enter-btn" href="dashboard.html">Explore the AI Hub →</a></p></div>
+  <main class="main" role="main">
+    <section class="panel" onclick="location.href='student.html'" tabindex="0" role="link" aria-label="Student portal">
+      <div class="avatar" aria-hidden="true">
+        <img src="student.webp" alt="Student" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=&#39;http://www.w3.org/2000/svg&#39; width=&#39;400&#39; height=&#39;400&#39;><rect width=&#39;100%&#39; height=&#39;100%&#39; fill=&#39;%23071420&#39;/><text x=&#39;50%&#39; y=&#39;50%&#39; fill=&#39;%2300ff9c&#39; font-family=&#39;monospace&#39; font-size=&#39;20&#39; dominant-baseline=&#39;middle&#39; text-anchor=&#39;middle&#39;>Student</text></svg>';">
+      </div>
+      <h3 class="role">Student</h3>
+      <p class="sub">Explore degrees, bootcamps & scholarships</p>
+      <a class="enter-btn" href="student.html" aria-label="Enter student portal">ENTER →</a>
+      <div class="hint">status: <span style="color:var(--neon)">secure · demo</span></div>
+    </section>
+
+    <section class="panel" onclick="location.href='graduate.html'" tabindex="0" role="link" aria-label="Graduate portal">
+      <div class="avatar" aria-hidden="true">
+        <img src="graduate.webp" alt="Graduate" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=&#39;http://www.w3.org/2000/svg&#39; width=&#39;400&#39; height=&#39;400&#39;><rect width=&#39;100%&#39; height=&#39;100%&#39; fill=&#39;%23071420&#39;/><text x=&#39;50%&#39; y=&#39;50%&#39; fill=&#39;%2300bfff&#39; font-family=&#39;monospace&#39; font-size=&#39;20&#39; dominant-baseline=&#39;middle&#39; text-anchor=&#39;middle&#39;>Graduate</text></svg>';">
+      </div>
+      <h3 class="role">Graduate</h3>
+      <p class="sub">Upskill, certifications & career switch</p>
+      <a class="enter-btn" href="graduate.html" aria-label="Enter graduate portal">ENTER →</a>
+      <div class="hint">status: <span style="color:#b79cff">verified · demo</span></div>
+    </section>
+  </main>
+
+  <script>
+    const texts = [
+      'Initializing secure session...',
+      'Analyzing skills & goals...',
+      'Personalizing career map...'
+    ];
+    let i = 0, j = 0, forward = true;
+    const el = document.getElementById('type-text');
+
+    function tick() {
+      const txt = texts[i];
+      if (forward) {
+        j++;
+        el.textContent = txt.slice(0, j);
+        if (j === txt.length) { forward = false; setTimeout(tick, 900); return; }
+      } else {
+        j--;
+        el.textContent = txt.slice(0, j);
+        if (j === 0) { forward = true; i = (i+1) % texts.length; }
+      }
+      setTimeout(tick, forward ? 40 : 20);
+    }
+    tick();
+
+    document.querySelectorAll('.panel').forEach(p=>{
+      p.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' ') p.click();
+      });
+    });
+  </script>
+  <script src="pro.js"></script>
+<script src="ai-chatbot.js"></script>
+</body>
+</html>

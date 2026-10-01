@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reference Courses Based on Skills</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-color: #0c1218;
+      --panel-color: #141b24;
+      --neon-blue: #00bfff;
+      --neon-green: #00ff9c;
+      --muted: #718096;
+      --text-color: #d0f0f7;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Roboto Mono', monospace;
+      background: linear-gradient(180deg, #071418, var(--bg-color));
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2rem;
+      color: var(--neon-green);
+      margin-bottom: 20px;
+      text-shadow: 0 0 6px var(--neon-green), 0 0 20px var(--neon-green);
+    }
+    .courses-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+    }
+    .course-card {
+      background: var(--panel-color);
+      border-radius: 15px;
+      padding: 18px;
+      border: 1px solid rgba(0, 191, 255, 0.2);
+      box-shadow: 0 0 12px rgba(0,191,255,0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .course-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 20px var(--neon-blue);
+    }
+    .course-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--neon-blue);
+      margin-bottom: 10px;
+    }
+    .course-description {
+      font-size: 0.9rem;
+      color: var(--muted);
+      flex-grow: 1;
+      margin-bottom: 12px;
+    }
+    .course-link {
+      color: var(--neon-green);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .course-link:hover {
+      color: var(--neon-blue);
+    }
+  </style>
+</head>
+<body>
+  <h1>📚 Recommended Courses for You</h1>
+
+  <div class="courses-container" id="coursesContainer"></div>
+
+  <script>
+    // Example: skills & interests stored in localStorage from previous page
+    // e.g., "python, web development, ai, cybersecurity"
+    const skillsInput = localStorage.getItem('studentSkills') || "python, web development";
+
+    const userSkills = skillsInput.split(',').map(s => s.trim().toLowerCase());
+
+    // Courses database with associated skills/interests
+    const allCourses = [
+      { title: "Python for Beginners", description: "Learn Python basics.", link: "#", skills: ["python", "programming"] },
+      { title: "Advanced Python", description: "Deep dive into Python programming.", link: "#", skills: ["python", "data science"] },
+      { title: "Full Stack Web Development", description: "HTML, CSS, JS, React.", link: "#", skills: ["web development", "javascript"] },
+      { title: "Machine Learning Basics", description: "Intro to ML algorithms.", link: "#", skills: ["ai", "python"] },
+      { title: "Cybersecurity Fundamentals", description: "Learn to protect systems & networks.", link: "#", skills: ["cybersecurity"] },
+      { title: "Ethical Hacking", description: "Practical penetration testing.", link: "#", skills: ["cybersecurity"] },
+      { title: "Data Structures & Algorithms", description: "Core programming concepts.", link: "#", skills: ["programming"] },
+      { title: "Cloud Computing Basics", description: "Intro to cloud platforms.", link: "#", skills: ["cloud", "it"] }
+    ];
+
+    // Filter courses based on student skills/interests
+    const recommendedCourses = allCourses.filter(course =>
+      course.skills.some(skill => userSkills.includes(skill))
+    );
+
+    const container = document.getElementById('coursesContainer');
+
+    if (recommendedCourses.length === 0) {
+      container.innerHTML = "<p style='text-align:center;color:var(--muted)'>No courses found for your skills/interests.</p>";
+    } else {
+      recommendedCourses.forEach(course => {
+        const card = document.createElement('div');
+        card.className = 'course-card';
+        card.innerHTML = `
+          <div class="course-title">${course.title}</div>
+          <div class="course-description">${course.description}</div>
+          <a href="${course.link}" class="course-link">Learn More →</a>
+        `;
+        container.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>

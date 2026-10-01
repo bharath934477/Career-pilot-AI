@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="guard.js"></script>
+  <meta charset="UTF-8" />
+  <title>Skills & Interests — Career Advisor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-color: #0a0d18;
+      --panel-color: #101820;
+      --neon-blue: #b79cff;
+      --neon-green: #8b9bff;
+      --muted: #555a65;
+      --text-color: #d9dcef;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(160,168,235,0.08), transparent 15%),
+        linear-gradient(180deg, #061016 0%, var(--bg-color) 50%, #03101a 100%);
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 100px;
+      color: var(--text-color);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      color: var(--neon-green);
+      margin-bottom: 20px;
+      text-shadow:
+        0 0 6px var(--neon-green),
+        0 0 20px var(--neon-green);
+      animation: flicker 3s linear infinite alternate;
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 6px var(--neon-green), 0 0 20px var(--neon-green);
+      }
+      20%, 22%, 24%, 55% {
+        opacity: 0.6;
+        text-shadow: none;
+      }
+    }
+
+    .form-box {
+      background: var(--panel-color);
+      padding: 30px 28px;
+      border-radius: 15px;
+      box-shadow: 0 0 24px rgba(160,168,235,0.3);
+      width: min(92vw, 420px);
+      border: 1px solid rgba(160,168,235,0.2);
+    }
+
+    input {
+      width: 90%;
+      padding: 12px;
+      margin: 14px 0;
+      border-radius: 10px;
+      border: 1.5px solid rgba(160,168,235,0.3);
+      background: transparent;
+      color: var(--text-color);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input::placeholder { color: var(--muted); font-style: italic; }
+    input:focus { border-color: var(--neon-blue); box-shadow: 0 0 14px var(--neon-blue); }
+
+    button {
+      background: var(--neon-blue);
+      color: #0b1024;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--neon-blue);
+      transition: background-color 0.3s ease;
+      letter-spacing: 1.1px;
+    }
+    button:hover {
+      background: var(--neon-green);
+      box-shadow: 0 0 30px var(--neon-green);
+      color: #0b1024;
+    }
+
+    #consoleMsg {
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      margin-top: 18px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      background: #011a2d;
+      color: var(--neon-green);
+      box-shadow: 0 0 14px var(--neon-green);
+      min-height: 36px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Your Skills & Interests</h1>
+  <div class="form-box">
+    <form id="skillForm" autocomplete="on" novalidate>
+      <input type="text" id="skills" name="skills" placeholder="Skills (e.g. Python, AI)" required />
+      <input type="text" id="interests" name="interests" placeholder="Interests (e.g. Web, Robotics)" required />
+      <button type="submit">Get Career Suggestions →</button>
+    </form>
+    <div id="consoleMsg"></div>
+  </div>
+
+  <script>
+    const skillForm = document.getElementById('skillForm');
+    const consoleMsg = document.getElementById('consoleMsg');
+
+    skillForm.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const skills = document.getElementById('skills').value.trim();
+      const interests = document.getElementById('interests').value.trim();
+
+      if (!skills || !interests) {
+        showConsoleMessage('⚠ Input error: Skills and Interests are required.');
+        return;
+      }
+
+      // Save data to localStorage
+      localStorage.setItem('skills', skills);
+      localStorage.setItem('interests', interests);
+      if(window.cpSaveProfile)cpSaveProfile(skills, interests);
+
+      showConsoleMessage('✅ Data encrypted and saved locally. Ready for next operation...');
+
+      setTimeout(() => {
+        window.location.href = 'my-plan.html';
+      }, 1600);
+    });
+
+    function showConsoleMessage(msg) {
+      consoleMsg.textContent = msg;
+      consoleMsg.style.opacity = '1';
+      setTimeout(() => { consoleMsg.style.opacity = '0'; }, 4000);
+    }
+  </script>
+  <script src="pro.js"></script>
+<script src="ai-chatbot.js"></script>
+</body>
+</html>

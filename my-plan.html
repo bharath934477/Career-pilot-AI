@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="guard.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Career Plan — CareerPilot AI</title>
+<style>
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;color:#e7e9f6;background:#070914;min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:100px 18px 120px}
+h1{background:linear-gradient(90deg,#8b9bff,#b79cff,#6d5efc);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0 0 6px}
+.sub{color:#8b94b1;margin:0 0 18px}.chips span{display:inline-block;margin:3px;padding:4px 10px;border-radius:999px;background:rgba(160,168,235,.12);border:1px solid rgba(160,168,235,.3);font-size:.8rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}@media(max-width:600px){.wrap{padding-top:90px}.tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}.tabs button{flex:none}.grid{grid-template-columns:1fr}}@media(min-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}.tabs button{background:#0d1120;color:#e7e9f6;border:1px solid rgba(160,168,235,.3);padding:9px 16px;border-radius:10px;cursor:pointer}
+.tabs button.on{background:linear-gradient(135deg,#8b9bff,#b79cff);color:#0b1024;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.c{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012));border:1px solid rgba(160,170,235,.16);border-top:1px solid rgba(242,196,109,.35);border-radius:16px;padding:18px;box-shadow:0 12px 30px rgba(3,5,20,.5)}
+.c h3{margin:0 0 4px}.c .m{color:#f2c46d;font-size:.82rem;margin-bottom:8px}.c p{color:#a4acc6;font-size:.88rem;line-height:1.45;margin:6px 0}
+.c a{display:inline-block;margin:4px 6px 0 0;padding:6px 11px;border-radius:8px;background:rgba(160,168,235,.12);border:1px solid rgba(160,168,235,.35);color:#b79cff;text-decoration:none;font-size:.8rem}
+.c a:hover{background:rgba(160,168,235,.25)}.step{border-left:3px solid #f2c46d;padding:4px 0 4px 14px;margin:0 0 14px}.step b{color:#f2c46d}
+.sel{margin:10px 0 0}select{background:#0d1120;color:#e7e9f6;border:1px solid rgba(160,168,235,.3);padding:8px;border-radius:8px}
+</style></head><body>
+<div class="wrap">
+<h1 id="hi">Your Career Plan</h1>
+<p class="sub">Advanced careers, live job searches, learning links and a development roadmap based on your details.</p>
+<div class="chips" id="chips"></div>
+<div class="tabs"><button data-t="careers" class="on">🚀 Careers</button><button data-t="jobs">💼 Jobs</button><button data-t="learn">📚 Learning Links</button><button data-t="dev">🛠 Development Plan</button></div>
+<div class="sel" id="selbox" style="display:none">Focus career: <select id="sel"></select></div>
+<div id="out" style="margin-top:16px"></div>
+</div>
+<script>
+const Q=encodeURIComponent;
+const DB={
+ "Full-Stack Developer":{k:["web","javascript","react","node","html","css","python","frontend","backend","programming","coding"],sal:"₹6–25 LPA",dem:"Very High",d:"Build complete web products, front end to database.",
+  jobs:["Junior Full-Stack Developer","React Developer","Node.js Developer"],learn:[["freeCodeCamp","https://www.freecodecamp.org/learn"],["The Odin Project","https://www.theodinproject.com/"],["roadmap.sh Full-Stack","https://roadmap.sh/full-stack"],["MDN Web Docs","https://developer.mozilla.org/en-US/docs/Learn"]],
+  dev:["HTML, CSS, JavaScript fundamentals","React + a backend (Node/Express) with REST APIs","SQL/MongoDB, authentication, deployment","Build 3 portfolio projects and open-source contributions","Learn testing, CI/CD and system design basics"]},
+ "Data Scientist / ML Engineer":{k:["data","ai","ml","machine","python","statistics","analytics","math","deep","research"],sal:"₹8–35 LPA",dem:"Very High",d:"Turn data into models and decisions using statistics and ML.",
+  jobs:["Data Analyst","Machine Learning Engineer","Data Scientist"],learn:[["Kaggle Learn","https://www.kaggle.com/learn"],["Coursera ML Specialization","https://www.coursera.org/specializations/machine-learning-introduction"],["fast.ai","https://course.fast.ai/"],["NPTEL Data Science","https://nptel.ac.in/"]],
+  dev:["Python, NumPy, pandas, SQL","Statistics and ML basics (scikit-learn)","Deep learning with PyTorch, NLP/vision projects","Kaggle competitions + deploy a model as an API","MLOps, cloud (AWS/GCP), LLM apps"]},
+ "Cybersecurity Analyst":{k:["security","cyber","network","hacking","linux","ethical","privacy","forensics"],sal:"₹5–30 LPA",dem:"High",d:"Protect systems, find vulnerabilities and respond to incidents.",
+  jobs:["SOC Analyst","Security Engineer","Penetration Tester"],learn:[["TryHackMe","https://tryhackme.com/"],["OWASP Top 10","https://owasp.org/www-project-top-ten/"],["Cybrary","https://www.cybrary.it/"],["roadmap.sh Cyber Security","https://roadmap.sh/cyber-security"]],
+  dev:["Networking, Linux, basic scripting","Web security (OWASP) and TryHackMe paths","Get CompTIA Security+ or CEH","CTFs and home-lab projects","Specialise: SOC, pentest or cloud security"]},
+ "Cloud / DevOps Engineer":{k:["cloud","devops","aws","azure","docker","kubernetes","linux","infrastructure","automation"],sal:"₹6–30 LPA",dem:"High",d:"Automate, deploy and scale software on cloud platforms.",
+  jobs:["DevOps Engineer","Cloud Engineer","Site Reliability Engineer"],learn:[["roadmap.sh DevOps","https://roadmap.sh/devops"],["AWS Skill Builder","https://skillbuilder.aws/"],["Docker Get Started","https://docs.docker.com/get-started/"],["Kubernetes Basics","https://kubernetes.io/docs/tutorials/kubernetes-basics/"]],
+  dev:["Linux, Git, networking","Docker and CI/CD (GitHub Actions)","AWS/Azure fundamentals certification","Terraform, Kubernetes, monitoring","Build and document an end-to-end pipeline"]},
+ "UI/UX Designer":{k:["design","ui","ux","figma","creative","art","graphics","user","visual"],sal:"₹4–20 LPA",dem:"High",d:"Design products people love to use.",
+  jobs:["UI/UX Designer","Product Designer","UX Researcher"],learn:[["Google UX Design Certificate","https://www.coursera.org/professional-certificates/google-ux-design"],["Figma Learn","https://help.figma.com/hc/en-us/categories/360002051613-Get-started"],["Laws of UX","https://lawsofux.com/"],["Interaction Design Foundation","https://www.interaction-design.org/"]],
+  dev:["Design principles, typography, colour","Master Figma and prototyping","User research and usability testing","Build 3 case studies for your portfolio","Learn design systems and basic front end"]},
+ "Mobile App Developer":{k:["mobile","android","ios","flutter","kotlin","swift","app","react native"],sal:"₹5–22 LPA",dem:"High",d:"Build apps for Android and iOS.",
+  jobs:["Flutter Developer","Android Developer","iOS Developer"],learn:[["Flutter Docs","https://docs.flutter.dev/get-started/learn-flutter"],["Android Basics (Kotlin)","https://developer.android.com/courses"],["Swift / SwiftUI","https://developer.apple.com/tutorials/swiftui"],["roadmap.sh Android","https://roadmap.sh/android"]],
+  dev:["Dart/Kotlin/Swift fundamentals","Build UI with Flutter or native","APIs, state management, local storage","Publish an app to the store","Add analytics, testing and CI"]},
+ "Robotics / Embedded Engineer":{k:["robot","robotics","embedded","iot","arduino","electronics","hardware","c++","electrical","mechanical"],sal:"₹4–20 LPA",dem:"Growing",d:"Build smart machines and connected devices.",
+  jobs:["Embedded Engineer","Robotics Engineer","IoT Developer"],learn:[["Arduino Project Hub","https://projecthub.arduino.cc/"],["ROS Tutorials","https://docs.ros.org/en/humble/Tutorials.html"],["NPTEL Robotics","https://nptel.ac.in/"],["Coursera Robotics","https://www.coursera.org/browse/physical-science-and-engineering/electrical-engineering"]],
+  dev:["C/C++ and electronics basics","Arduino/ESP32 and sensors","ROS and simulation","Build an autonomous robot/IoT project","Learn RTOS and PCB design"]},
+ "Digital Marketing / Business Analyst":{k:["marketing","business","sales","seo","management","finance","communication","content","mba"],sal:"₹3–18 LPA",dem:"High",d:"Grow products using data, content and strategy.",
+  jobs:["Digital Marketing Executive","Business Analyst","Product Manager (Associate)"],learn:[["Google Digital Garage","https://learndigital.withgoogle.com/digitalgarage"],["HubSpot Academy","https://academy.hubspot.com/"],["Google Analytics Academy","https://skillshop.withgoogle.com/"],["Coursera Business Analytics","https://www.coursera.org/browse/business"]],
+  dev:["Marketing/business fundamentals","SEO, ads, analytics tools","Excel, SQL and dashboards (Power BI/Tableau)","Run a real campaign or case study","Learn product thinking and stakeholder communication"]}
+};
+const sk=(localStorage.getItem('skills')||'').split(',').map(s=>s.trim()).filter(Boolean);
+const it=(localStorage.getItem('interests')||'').split(',').map(s=>s.trim()).filter(Boolean);
+let sess={};try{sess=JSON.parse(localStorage.getItem('cp_session')||'{}')}catch{}
+const role=sess.role||'student';
+document.getElementById('hi').textContent=(sess.name?sess.name+"'s ":'Your ')+'Career Plan';
+document.getElementById('chips').innerHTML=[...sk,...it].map(x=>`<span>${x.replace(/</g,'&lt;')}</span>`).join('')||'<span>Add skills in the Skills page for better matches</span>';
+const words=(sk.concat(it)).join(' ').toLowerCase();
+const ranked=Object.entries(DB).map(([n,c])=>({n,c,s:c.k.filter(k=>words.includes(k)).length})).sort((a,b)=>b.s-a.s);
+const list=ranked.slice(0,6);
+const sel=document.getElementById('sel');
+const logPlan=(why)=>{if(window.cpLog)cpLog('myPlan',{why,skills:sk,interests:it,topCareers:list.map(x=>x.n+' ('+x.c.sal+')'),focusCareer:sel.value,jobRoles:DB[sel.value]?DB[sel.value].jobs:[],learningLinks:DB[sel.value]?DB[sel.value].learn.map(l=>l[0]+' - '+l[1]):[],developmentPlan:DB[sel.value]?DB[sel.value].dev:[]})};sel.innerHTML=list.map(x=>`<option>${x.n}</option>`).join('');
+sel.onchange=()=>{show(tab);logPlan('focus changed')};
+let tab='careers';
+const gl=(q)=>`https://www.google.com/search?q=${Q(q)}`;
+function jobLinks(role){return [["LinkedIn",`https://www.linkedin.com/jobs/search/?keywords=${Q(role)}`],["Naukri",`https://www.naukri.com/${role.toLowerCase().replace(/[^a-z0-9]+/g,'-')}-jobs`],["Indeed",`https://in.indeed.com/jobs?q=${Q(role)}`],["Internshala",`https://internshala.com/internships/keywords-${Q(role)}`]]}
+function show(t){tab=t;document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ document.getElementById('selbox').style.display=t==='dev'||t==='learn'?'block':'none';
+ const o=document.getElementById('out');const cur=DB[sel.value];
+ if(t==='careers')o.innerHTML='<div class="grid">'+list.map((x,i)=>`<div class="c"><h3>${i===0?'⭐ ':''}${x.n}</h3><div class="m">${x.c.sal} · Demand: ${x.c.dem}${x.s?` · ${x.s} skill match${x.s>1?'es':''}`:''}</div><p>${x.c.d}</p></div>`).join('')+'</div>';
+ if(t==='jobs')o.innerHTML='<div class="grid">'+list.map(x=>`<div class="c"><h3>${x.n}</h3><div class="m">Roles to apply for${role==='student'?' (internships first)':''}</div>${x.c.jobs.map(j=>`<p><b>${j}</b><br>${jobLinks(j).map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('')}</p>`).join('')}</div>`).join('')+'</div>';
+ if(t==='learn')o.innerHTML=`<div class="c"><h3>${sel.value}</h3><div class="m">Free & trusted learning links</div>${cur.learn.map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${n} ↗</a>`).join('')}<p>More: <a href="${gl(sel.value+' full course')}" target="_blank" rel="noopener">Google</a><a href="https://www.youtube.com/results?search_query=${Q(sel.value+' roadmap tutorial')}" target="_blank" rel="noopener">YouTube</a><a href="https://www.coursera.org/search?query=${Q(sel.value)}" target="_blank" rel="noopener">Coursera</a></p></div>`;
+ if(t==='dev')o.innerHTML=`<div class="c"><h3>${sel.value} — Development Roadmap</h3><div class="m">${role==='graduate'?'Fast-track (6–9 months)':'Step-by-step (12+ months alongside studies)'}</div>${cur.dev.map((s,i)=>`<div class="step"><b>Phase ${i+1}</b><br>${s}</div>`).join('')}</div>`;
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>show(b.dataset.t));show('careers');setTimeout(()=>logPlan('opened'),600);
+</script>
+<script src="pro.js"></script>
+<script src="ai-chatbot.js"></script>
+</body></html>

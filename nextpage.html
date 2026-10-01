@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="guard.js"></script>
+  <meta charset="UTF-8" />
+  <title>Career Suggestions — Career Advisor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-color: #0a0d18;
+      --panel-color: #101820;
+      --neon-blue: #b79cff;
+      --neon-green: #8b9bff;
+      --muted: #555a65;
+      --text-color: #d9dcef;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(160,168,235,0.08), transparent 15%),
+        linear-gradient(180deg, #061016 0%, var(--bg-color) 50%, #03101a 100%);
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 80px 16px;
+      color: var(--text-color);
+    }
+
+    h1 {
+      color: var(--neon-blue);
+      text-shadow: 0 0 6px var(--neon-blue), 0 0 20px var(--neon-blue);
+      margin-bottom: 20px;
+      animation: flicker 3s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+      }
+      20%, 22%, 24%, 55% {
+        opacity: 0.6;
+      }
+    }
+
+    .terminal {
+      background: var(--panel-color);
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(160,168,235,0.4);
+      border: 1px solid rgba(160,168,235,0.2);
+      padding: 30px;
+      width: min(90%, 600px);
+      min-height: 300px;
+      font-size: 1rem;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .line {
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+    }
+
+    .green { color: var(--neon-green); }
+    .blue { color: var(--neon-blue); }
+
+    button {
+      margin-top: 30px;
+      background: var(--neon-green);
+      color: #0b1024;
+      border: none;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--neon-green);
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: var(--neon-blue);
+      box-shadow: 0 0 30px var(--neon-blue);
+      color: #0b1024;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Career Intelligence Report</h1>
+  <div class="terminal" id="terminal"></div>
+  <button onclick="restart()">← Back to Input</button>
+  <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+    <a href="resume-analyzer.html" style="color:var(--neon-green);">🩺 Analyze my skill gaps</a>
+    <a href="roadmap.html" style="color:var(--neon-green);">🗺️ Get a learning roadmap</a>
+  </div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+
+    function printLine(text, color = '') {
+      const line = document.createElement('div');
+      line.className = 'line ' + color;
+      line.textContent = text;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function typeLine(text, color = '', delay = 30) {
+      return new Promise(resolve => {
+        const line = document.createElement('div');
+        line.className = 'line ' + color;
+        terminal.appendChild(line);
+        let i = 0;
+        const typer = setInterval(() => {
+          line.textContent = text.slice(0, i++);
+          terminal.scrollTop = terminal.scrollHeight;
+          if (i > text.length) {
+            clearInterval(typer);
+            resolve();
+          }
+        }, delay);
+      });
+    }
+
+    function restart() {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+
+    async function main() {
+      const skills = localStorage.getItem('skills');
+      const interests = localStorage.getItem('interests');
+
+      if (!skills || !interests) {
+        printLine('⚠️ Data not found. Redirecting...', 'green');
+        setTimeout(() => window.location.href = 'index.html', 1500);
+        return;
+      }
+
+      const skillList = skills.split(',').map(s => s.trim());
+      const interestList = interests.split(',').map(i => i.trim());
+
+      await typeLine('> Initializing career intelligence engine...', 'blue', 40);
+      await typeLine('> Skills detected: ' + skillList.join(', '), 'green', 25);
+      await typeLine('> Interests detected: ' + interestList.join(', '), 'green', 25);
+      await typeLine('> Processing data through AI neurons...', 'blue', 40);
+
+      try {
+        const aiSuggestions = await getAISuggestions(skillList, interestList);
+        await typeLine('> AI-powered career paths identified:\n', 'green', 25);
+        aiSuggestions.forEach(career => {
+          const card = document.createElement('div');
+          card.className = 'line';
+          card.innerHTML = `<strong style="color:var(--neon-green)">• ${career.title}</strong><br/><span style="color:var(--text-color)">${career.description || ''}</span>`;
+          terminal.appendChild(card);
+        });
+      } catch (err) {
+        console.error('AI suggestion failed, using local generation:', err);
+        await typeLine('> ⚠️ AI unavailable, using local intelligence engine...', 'blue', 40);
+        const suggestions = generateSuggestions(skillList, interestList);
+        await typeLine('> Potential career paths identified:\n', 'green', 25);
+        for (const s of suggestions) {
+          await typeLine('   • ' + s, 'blue', 25);
+        }
+      }
+
+      await typeLine('\n> Operation complete. System ready for deployment 🚀', 'green', 35);
+    }
+
+    async function getAISuggestions(skills, interests) {
+      const response = await fetch('http://localhost:5000/api/suggest-careers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skills: skills.join(', '), interests: interests.join(', ') }),
+      });
+      if (!response.ok) throw new Error('Failed to get AI suggestions');
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || 'AI suggestion failed');
+      return data.suggestions;
+    }
+
+    function generateSuggestions(skills, interests) {
+      const all = [
+        { match: ['python', 'ai', 'ml'], career: 'Machine Learning Engineer' },
+        { match: ['javascript', 'web'], career: 'Full Stack Developer' },
+        { match: ['network', 'security', 'linux'], career: 'Cybersecurity Analyst' },
+        { match: ['design', 'ui', 'ux'], career: 'UI/UX Designer' },
+        { match: ['data', 'analytics', 'sql'], career: 'Data Scientist' },
+        { match: ['cloud', 'aws', 'azure'], career: 'Cloud Solutions Architect' },
+        { match: ['robotics', 'automation'], career: 'Robotics Engineer' },
+        { match: ['writing', 'communication'], career: 'Technical Writer' },
+        { match: ['gaming', '3d', 'graphics'], career: 'Game Developer' },
+      ];
+
+      const lowerSkills = skills.map(s => s.toLowerCase());
+      const lowerInterests = interests.map(i => i.toLowerCase());
+
+      const matched = all.filter(({ match }) =>
+        match.some(word => lowerSkills.includes(word) || lowerInterests.includes(word))
+      );
+
+      return matched.length
+        ? matched.map(m => m.career)
+        : ['Software Developer', 'System Administrator', 'IT Consultant'];
+    }
+
+    main();
+  </script>
+  <script src="pro.js"></script>
+<script src="ai-chatbot.js"></script>
+</body>
+</html>

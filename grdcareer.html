@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="guard.js"></script>
+  <meta charset="UTF-8" />
+  <title>Career Intelligence — Skills, Paths & Courses</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-color: #0a0d18;
+      --panel-color: #101820e0;
+      --neon-blue: #b79cff;
+      --neon-green: #8b9bff;
+      --muted: #555a65;
+      --text-color: #d9dcef;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 80px 16px;
+      color: var(--text-color);
+      background: var(--bg-color);
+      overflow: hidden;
+    }
+
+    h1 {
+      color: var(--neon-green);
+      text-shadow: 0 0 6px var(--neon-green), 0 0 20px var(--neon-green);
+      margin-bottom: 20px;
+      animation: flicker 3s infinite alternate;
+      z-index: 2;
+      position: relative;
+      text-align: center;
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+      20%, 22%, 24%, 55% { opacity: 0.6; }
+    }
+
+    .form-box, .terminal {
+      background: var(--panel-color);
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(160,168,235,0.4);
+      border: 1px solid rgba(160,168,235,0.2);
+      padding: 30px;
+      width: min(90%, 700px);
+      position: relative;
+      z-index: 2;
+    }
+
+    .form-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input {
+      width: 90%;
+      padding: 12px;
+      margin: 14px 0;
+      border-radius: 10px;
+      border: 1.5px solid rgba(160,168,235,0.3);
+      background: transparent;
+      color: var(--text-color);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input::placeholder {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    input:focus {
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 14px var(--neon-blue);
+    }
+
+    button {
+      display: block;
+      width: 90%;
+      padding: 14px;
+      margin: 18px auto 0;
+      border: none;
+      border-radius: 12px;
+      background: var(--neon-blue);
+      color: #0b1024;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      letter-spacing: 1.1px;
+      box-shadow: 0 0 20px var(--neon-blue);
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: var(--neon-green);
+      box-shadow: 0 0 30px var(--neon-green);
+      color: #0b1024;
+    }
+
+    .terminal {
+      display: none;
+      overflow-y: auto;
+      max-height: 60vh;
+    }
+
+    .line {
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+    }
+
+    .career-card {
+      border: 1px solid rgba(160,168,235,0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 10px 0;
+      background: rgba(20,24,48,.5);
+      box-shadow: 0 0 12px rgba(139,155,255,0.2);
+    }
+
+    .career-card h3 {
+      color: var(--neon-green);
+      margin: 0 0 6px;
+    }
+
+    .career-card p, .career-card ul {
+      color: var(--text-color);
+      margin: 4px 0;
+      font-size: 0.95rem;
+    }
+
+    .career-card ul {
+      list-style-type: square;
+      padding-left: 20px;
+    }
+
+    .green { color: var(--neon-green); }
+    .blue { color: var(--neon-blue); }
+
+    #backBtn {
+      margin-top: 25px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="pageTitle">🎯 Your Skills & Interests</h1>
+
+  <div class="form-box" id="formSection">
+    <form id="skillForm">
+      <input type="text" id="skills" name="skills" placeholder="Skills (e.g. Python, AI)" required />
+      <input type="text" id="interests" name="interests" placeholder="Interests (e.g. Web, Data)" required />
+      <button type="submit">Get Career Suggestions →</button>
+    </form>
+    <div id="consoleMsg" class="green" style="margin-top:15px; opacity:0; transition:opacity 0.5s;"> </div>
+  </div>
+
+  <div class="terminal" id="terminal"></div>
+  <button id="backBtn">← Back to Input</button>
+  <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+    <a href="resume-analyzer.html" style="color:var(--neon-blue);">🩺 Analyze my skill gaps</a>
+    <a href="roadmap.html" style="color:var(--neon-blue);">🗺️ Get a learning roadmap</a>
+  </div>
+
+  <script>
+    const skillForm = document.getElementById('skillForm');
+    const formSection = document.getElementById('formSection');
+    const terminal = document.getElementById('terminal');
+    const consoleMsg = document.getElementById('consoleMsg');
+    const pageTitle = document.getElementById('pageTitle');
+    const backBtn = document.getElementById('backBtn');
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadUserData();
+    });
+
+    async function loadUserData() {
+      try {
+        const userEmail = localStorage.getItem('graduateEmail');
+        if (userEmail) {
+          const response = await fetch(`http://localhost:5000/api/user/${userEmail}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.user) {
+              if (data.user.skills?.length) {
+                document.getElementById('skills').value = data.user.skills.join(', ');
+              }
+              if (data.user.interests?.length) {
+                document.getElementById('interests').value = data.user.interests.join(', ');
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+
+    skillForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const skills = document.getElementById('skills').value.trim();
+      const interests = document.getElementById('interests').value.trim();
+
+      if (!skills || !interests) {
+        showConsoleMessage('⚠️ Input error: Skills and Interests are required.');
+        return;
+      }
+
+      localStorage.setItem('skills', skills);
+      localStorage.setItem('interests', interests);
+      if(window.cpSaveProfile)cpSaveProfile(skills, interests);
+
+      showConsoleMessage('✅ Data encrypted and saved locally. Launching terminal...');
+      setTimeout(()=>{window.location.href='my-plan.html'},1500);
+    });
+
+    function showConsoleMessage(msg) {
+      consoleMsg.textContent = msg;
+      consoleMsg.style.opacity = '1';
+      setTimeout(() => (consoleMsg.style.opacity = '0'), 4000);
+    }
+
+    async function loadTerminal() {
+      formSection.style.display = 'none';
+      terminal.style.display = 'block';
+      backBtn.style.display = 'inline-block';
+      pageTitle.textContent = '🧠 Career Intelligence Report';
+      await main();
+    }
+
+    function typeLine(text, color = '', delay = 30) {
+      return new Promise(resolve => {
+        const line = document.createElement('div');
+        line.className = 'line ' + color;
+        terminal.appendChild(line);
+        let i = 0;
+        const typer = setInterval(() => {
+          line.textContent = text.slice(0, i++);
+          terminal.scrollTop = terminal.scrollHeight;
+          if (i > text.length) {
+            clearInterval(typer);
+            resolve();
+          }
+        }, delay);
+      });
+    }
+
+    async function main() {
+      let skills, interests;
+      const savedSkills = localStorage.getItem('skills');
+      const savedInterests = localStorage.getItem('interests');
+
+      if (savedSkills && savedInterests) {
+        skills = savedSkills.split(',').map(s => s.trim());
+        interests = savedInterests.split(',').map(i => i.trim());
+      } else {
+        skills = document.getElementById('skills').value.trim().split(',').map(s => s.trim());
+        interests = document.getElementById('interests').value.trim().split(',').map(i => i.trim());
+      }
+
+      await typeLine('> Initializing career intelligence engine...', 'blue', 40);
+      await typeLine('> Skills detected: ' + skills.join(', '), 'green', 25);
+      await typeLine('> Interests detected: ' + interests.join(', '), 'green', 25);
+      await typeLine('> Running neural analysis...', 'blue', 40);
+
+      try {
+        const aiSuggestions = await getAISuggestions(skills, interests);
+        await typeLine('> AI-powered career paths identified:\n', 'green', 25);
+        
+        aiSuggestions.forEach(career => {
+          const card = document.createElement('div');
+          card.className = 'career-card';
+          card.innerHTML = `
+            <h3>${career.title}</h3>
+            <p><strong>About:</strong> ${career.description}</p>
+            <p><strong>Key Skills:</strong> ${career.skills ? career.skills.join(', ') : 'N/A'}</p>
+            <p><strong>Growth Potential:</strong> ${career.growth || 'Information not available'}</p>
+            ${career.resources ? `
+            <p><strong>Recommended Learning Path:</strong></p>
+            <ul>
+              ${career.resources.map(r => `<li><a href="${r.url}" target="_blank" style="color:var(--neon-blue);text-decoration:none;">${r.title}</a></li>`).join('')}
+            </ul>` : ''}
+          `;
+          terminal.appendChild(card);
+        });
+      } catch (error) {
+        console.error('AI suggestion failed, using local generation:', error);
+        await typeLine('> ⚠️ AI unavailable, using local intelligence engine...', 'blue', 40);
+        const suggestions = generateSuggestions(skills, interests);
+        await typeLine('> Potential career paths identified:\n', 'green', 25);
+
+        suggestions.forEach(career => {
+          const card = document.createElement('div');
+          card.className = 'career-card';
+          card.innerHTML = `
+            <h3>${career.title}</h3>
+            <p><strong>About:</strong> ${career.desc}</p>
+            <p><strong>Key Skills:</strong> ${career.skills}</p>
+            <p><strong>Recommended Tools:</strong> ${career.tools}</p>
+            <p><strong>Recommended Courses:</strong></p>
+            <ul>
+              ${career.courses.map(c => `<li><a href="${c.link}" target="_blank" style="color:var(--neon-blue);text-decoration:none;">${c.name}</a></li>`).join('')}
+            </ul>
+          `;
+          terminal.appendChild(card);
+        });
+      }
+
+      await typeLine('\n> Operation complete. System ready for deployment 🚀', 'green', 35);
+    }
+
+    async function getAISuggestions(skills, interests) {
+      const response = await fetch('http://localhost:5000/api/suggest-careers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skills: skills.join(', '), interests: interests.join(', ') })
+      });
+
+      if (!response.ok) throw new Error('Failed to get AI suggestions');
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || 'AI suggestion failed');
+      return data.suggestions;
+    }
+
+    function generateSuggestions(skills, interests) {
+      const data = [
+        {
+          keywords: ['python', 'ml', 'ai', 'data'],
+          title: 'Machine Learning Engineer',
+          desc: 'Builds and trains models that allow systems to learn from data.',
+          skills: 'Python, TensorFlow, Pandas, Scikit-learn',
+          tools: 'Jupyter, PyTorch, Google Colab',
+          courses: [
+            { name: 'Machine Learning by Andrew Ng — Coursera', link: 'https://www.coursera.org/learn/machine-learning' },
+            { name: 'Deep Learning Specialization — Coursera', link: 'https://www.coursera.org/specializations/deep-learning' },
+            { name: 'AI for Everyone — Coursera', link: 'https://www.coursera.org/learn/ai-for-everyone' }
+          ]
+        },
+        {
+          keywords: ['javascript', 'web', 'react', 'html', 'css'],
+          title: 'Full Stack Developer',
+          desc: 'Creates both front-end and back-end components of web apps.',
+          skills: 'JavaScript, React, Node.js, Express',
+          tools: 'VS Code, GitHub, Postman',
+          courses: [
+            { name: 'The Odin Project — Full Stack Curriculum', link: 'https://www.theodinproject.com/' },
+            { name: 'React for Beginners — Scrimba', link: 'https://scrimba.com/learn/react' },
+            { name: 'Node.js and Express — FreeCodeCamp', link: 'https://www.freecodecamp.org/learn/back-end-development-and-apis/' }
+          ]
+        },
+        {
+          keywords: ['network', 'security', 'linux', 'hacking'],
+          title: 'Cybersecurity Analyst',
+          desc: 'Protects systems from threats, vulnerabilities, and attacks.',
+          skills: 'Networking, Pen Testing, Firewalls',
+          tools: 'Wireshark, Metasploit, Burp Suite',
+          courses: [
+            { name: 'Introduction to Cyber Security — Coursera', link: 'https://www.coursera.org/learn/intro-cyber-security' },
+            { name: 'TryHackMe Labs', link: 'https://tryhackme.com/' },
+            { name: 'CompTIA Security+ Training — Udemy', link: 'https://www.udemy.com/course/comptia-security-certification-sy0-601/' }
+          ]
+        },
+        {
+          keywords: ['design', 'ui', 'ux', 'creative'],
+          title: 'UI/UX Designer',
+          desc: 'Designs intuitive and visually appealing digital interfaces.',
+          skills: 'Prototyping, Figma, Adobe XD',
+          tools: 'Figma, Sketch, Photoshop',
+          courses: [
+            { name: 'Google UX Design Professional Certificate — Coursera', link: 'https://www.coursera.org/professional-certificates/google-ux-design' },
+            { name: 'UI/UX Crash Course — YouTube', link: 'https://www.youtube.com/watch?v=9B1ZBuGgf8Y' },
+            { name: 'Design Thinking — Interaction Design Foundation', link: 'https://www.interaction-design.org/courses/design-thinking-the-beginner-s-guide' }
+          ]
+        },
+        {
+          keywords: ['data', 'sql', 'excel', 'visualization'],
+          title: 'Data Analyst',
+          desc: 'Transforms raw data into actionable business insights.',
+          skills: 'SQL, Data Cleaning, Excel, Power BI',
+          tools: 'Tableau, Power BI, Python',
+          courses: [
+            { name: 'Google Data Analytics Professional Certificate — Coursera', link: 'https://www.coursera.org/professional-certificates/google-data-analytics' },
+            { name: 'Data Analysis with Python — FreeCodeCamp', link: 'https://www.freecodecamp.org/learn/data-analysis-with-python/' },
+            { name: 'Excel to MySQL: Analytic Techniques — Coursera', link: 'https://www.coursera.org/specializations/excel-mysql' }
+          ]
+        },
+      ];
+
+      const input = [...skills, ...interests].map(s => s.toLowerCase());
+      const matches = data.filter(item =>
+        item.keywords.some(k => input.includes(k))
+      );
+      return matches.length ? matches : [data[1], data[2]];
+    }
+
+    backBtn.addEventListener('click', () => {
+      terminal.innerHTML = '';
+      localStorage.clear();
+      terminal.style.display = 'none';
+      formSection.style.display = 'flex';
+      pageTitle.textContent = '🎯 Your Skills & Interests';
+      backBtn.style.display = 'none';
+    });
+  </script>
+  <script src="pro.js"></script>
+<script src="ai-chatbot.js"></script>
+</body>
+</html>

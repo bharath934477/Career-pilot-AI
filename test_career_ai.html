@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career AI Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #0a0f14;
+            color: #c7f0f9;
+        }
+        .container {
+            background: #101820;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,191,255,0.4);
+            border: 1px solid rgba(0,191,255,0.2);
+        }
+        h1 {
+            color: #00ff9c;
+            text-align: center;
+            text-shadow: 0 0 6px #00ff9c, 0 0 20px #00ff9c;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .success {
+            background-color: rgba(0,255,156,0.1);
+            color: #00ff9c;
+            border: 1px solid rgba(0,255,156,0.3);
+        }
+        .error {
+            background-color: rgba(255,107,107,0.1);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,107,107,0.3);
+        }
+        .info {
+            background-color: rgba(0,191,255,0.1);
+            color: #00bfff;
+            border: 1px solid rgba(0,191,255,0.3);
+        }
+        button {
+            background: #00bfff;
+            color: #001b29;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(0,191,255,0.3);
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00ff9c;
+            box-shadow: 0 0 30px rgba(0,255,156,0.3);
+            color: #011f0a;
+        }
+        button:disabled {
+            background: #555a65;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        pre {
+            background: #011a2d;
+            border: 1px solid rgba(0,255,156,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-x: auto;
+            color: #00ff9c;
+            box-shadow: 0 0 14px rgba(0,255,156,0.2);
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1.5px solid rgba(0,191,255,0.3);
+            background: transparent;
+            color: #c7f0f9;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #555a65;
+            font-style: italic;
+        }
+        .card {
+            border: 1px solid rgba(0,191,255,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            background: rgba(0,30,40,0.4);
+            box-shadow: 0 0 12px rgba(0,255,156,0.2);
+        }
+        .card h3 {
+            color: #00ff9c;
+            margin: 0 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Career AI Test</h1>
+        
+        <div id="status" class="status info">
+            Test the AI career suggestions functionality
+        </div>
+        
+        <div>
+            <h2>Test Career AI</h2>
+            <input type="text" id="skillsInput" placeholder="Enter skills (comma separated)" value="Python, Machine Learning, Data Analysis">
+            <input type="text" id="interestsInput" placeholder="Enter interests (comma separated)" value="AI, Technology, Problem Solving">
+            <button id="testAiButton">Get AI Career Suggestions</button>
+        </div>
+        
+        <div>
+            <h2>Results</h2>
+            <pre id="response">No response yet</pre>
+        </div>
+        
+        <div id="careerCards"></div>
+    </div>
+
+    <script>
+        document.getElementById('testAiButton').addEventListener('click', async () => {
+            const statusDiv = document.getElementById('status');
+            const responsePre = document.getElementById('response');
+            const careerCardsDiv = document.getElementById('careerCards');
+            
+            const skills = document.getElementById('skillsInput').value;
+            const interests = document.getElementById('interestsInput').value;
+            
+            if (!skills || !interests) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = 'Please enter both skills and interests';
+                return;
+            }
+            
+            try {
+                statusDiv.className = 'status info';
+                statusDiv.textContent = 'Getting AI career suggestions...';
+                responsePre.textContent = 'Processing...';
+                careerCardsDiv.innerHTML = '';
+                
+                const skillsList = skills.split(',').map(s => s.trim());
+                const interestsList = interests.split(',').map(i => i.trim());
+                
+                const query = `Based on these skills: ${skills} and interests: ${interests}, 
+                suggest 3 career paths with the following details for each:
+                1. title (string)
+                2. description (string, detailed description of the career)
+                3. skills (array of strings, key skills needed)
+                4. growth (string, growth potential information)
+                5. resources (array of objects with title and url for learning resources)
+                
+                Format the response as a JSON array.`;
+
+                const response = await fetch('http://localhost:5000/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        searchQuery: query
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                responsePre.textContent = data.result;
+                
+                // Try to parse and display career cards
+                try {
+                    let jsonString = data.result;
+                    const jsonStart = jsonString.indexOf('[');
+                    const jsonEnd = jsonString.lastIndexOf(']') + 1;
+                    if (jsonStart !== -1 && jsonEnd !== -1) {
+                        jsonString = jsonString.substring(jsonStart, jsonEnd);
+                    }
+                    const careers = JSON.parse(jsonString);
+                    
+                    careers.forEach(career => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <h3>${career.title}</h3>
+                            <p><strong>About:</strong> ${career.description}</p>
+                            <p><strong>Key Skills:</strong> ${career.skills ? career.skills.join(', ') : 'N/A'}</p>
+                            <p><strong>Growth Potential:</strong> ${career.growth || 'N/A'}</p>
+                            ${career.resources ? `
+                            <p><strong>Learning Resources:</strong></p>
+                            <ul>
+                                ${career.resources.map(r => `<li><a href="${r.url}" target="_blank" style="color:#00bfff;text-decoration:none;">${r.title}</a></li>`).join('')}
+                            </ul>
+                            ` : ''}
+                        `;
+                        careerCardsDiv.appendChild(card);
+                    });
+                    
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = 'AI career suggestions received successfully!';
+                } catch (parseError) {
+                    console.error('Failed to parse AI response as JSON:', parseError);
+                    statusDiv.className = 'status info';
+                    statusDiv.textContent = 'AI response received (displaying as text)';
+                }
+            } catch (error) {
+                console.error('Error getting AI career suggestions:', error);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = 'Failed to get AI career suggestions';
+                responsePre.textContent = error.message;
+            }
+        });
+    </script>
+</body>
+</html>
